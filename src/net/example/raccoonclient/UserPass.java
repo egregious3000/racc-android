@@ -28,5 +28,20 @@ public class UserPass extends Activity {
         } catch (Exception e) {
         	Log.e(TAG, "Exception: " + e);
         }
+        Button b = (Button) findViewById(R.id.userpass);
+        ((Button) findViewById(R.id.done))
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent resultIntent = new Intent();
+                        resultIntent.putExtra("username", _username.getText()
+                                .toString());
+                        resultIntent.putExtra("password", _password.getText()
+                                .toString());
+                        setResult(Activity.RESULT_OK, resultIntent);
+                        finish();
+                    }
+                });
     }
+    
 }
