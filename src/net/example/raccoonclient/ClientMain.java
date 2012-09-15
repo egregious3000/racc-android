@@ -41,8 +41,8 @@ public class ClientMain extends Service {
 	
 	private Socket _s = null;
 
-	
-	public void login() {
+	// Returns success if we log in
+	public boolean login() {
 	    Log.w(TAG, "logging in");
 	    try {
             _s = new Socket("bbs.iscabbs.com", 6145);
@@ -53,38 +53,54 @@ public class ClientMain extends Service {
         }
 	    String r = readline();
 	    Log.e(TAG, "login got " + r);
+	    return true;
 	}
 
+	public void logout() {
+	    Log.w(TAG, "logging out");
+	    if (_s == null)
+	        return;
+	    try {
+	        String ret = writeline("QUIT\n");
+	        Log.w(TAG, "ret is " + ret);
+            _s.close();
+        } catch (IOException e) {
+            Log.e(TAG, "IO Exception on close", e);
+        }
+	    _s = null;
+	}
+	
 	private String readline() { 
+        assert (_s != null);
 	    try {
     	    InputStream ins = _s.getInputStream();
     	    byte[] buffer = new byte[75000]; 
     	    int readlen = ins.read(buffer);
-            Log.w(TAG, "read in " + readlen + " thingies.");
-//            return buffer.toString();
+    	    if (readlen == -1) 
+    	        return "";
+    	    Log.w(TAG, "read in " + readlen + " thingies.");
             return new String(buffer, 0, readlen, "UTF-8");
-	    } catch (IOException e) {
+        } catch (IOException e) {
             Log.e(TAG, "readline ioexception", e);
+        } catch (Exception e) {
+            Log.e(TAG, "Other exception", e);
         }
 	    return "";
 	}
 
 	public String writeline(String msg) {
-	    
+        assert (_s != null);
 	    OutputStream outs;
 	    try {
             outs = _s.getOutputStream();
             byte[] send = msg.getBytes("UTF-8");
             outs.write(send);
         } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Log.e(TAG, "UTF-8 doesn't work, this is weird", e);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Log.e(TAG, "IO Exception", e);
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Log.e(TAG, "Other error", e);
         }
 	    return readline();
 	}

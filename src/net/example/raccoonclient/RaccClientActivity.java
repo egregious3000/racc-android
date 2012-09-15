@@ -51,23 +51,19 @@ public class RaccClientActivity extends Activity {
     private Handler _h = new Handler();
     MainUILoop _looper = new MainUILoop();
     boolean _killed = false;
-    
+
     private class MainUILoop implements Runnable {
         @Override
         public void run() {
             if (_killed)
                 return;
-            ( (TextView) findViewById(R.id.login) ).setText(Long.toString(System.currentTimeMillis()));
-            if (_main == null) {
-                Log.e(TAG, "err: main is null");
-            } else {
-                ( (TextView) findViewById(R.id.logout) ).setText(_main._username);                
-            }
-            _h.postDelayed(this, 500);
+            // Does nothing for now 
+            _h.postDelayed(this, 1000);
         }
     }
     // End UI Loop Code
-    
+
+    Button _userpass, _login, _logout;
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,10 +72,14 @@ public class RaccClientActivity extends Activity {
         setContentView(R.layout.main);
         Button b = (Button) findViewById(R.id.userpass);
         b.setOnClickListener(_buttonhandler);
-        ( (Button) findViewById(R.id.userpass)).setOnClickListener(_buttonhandler);
-        ( (Button) findViewById(R.id.login)).setOnClickListener(_buttonhandler);
-        ( (Button) findViewById(R.id.logout)).setOnClickListener(_buttonhandler);
-    	_h.post(_looper);
+        _userpass = (Button) findViewById(R.id.userpass);
+        _login  = (Button) findViewById(R.id.login);
+        _logout = (Button) findViewById(R.id.logout);
+        _userpass.setOnClickListener(_buttonhandler);
+        _login.setOnClickListener(_buttonhandler);
+        _logout.setOnClickListener(_buttonhandler);
+        _logout.setEnabled(false);
+        _h.post(_looper);
 	}
 
 	private ButtonHandler _buttonhandler = new ButtonHandler();
@@ -90,14 +90,25 @@ public class RaccClientActivity extends Activity {
                 Intent i = new Intent(RaccClientActivity.this, UserPass.class);
                 startActivity(i);
                 break;
-	        case R.id.login:
-	            if (_main == null) {
-	                Log.e(TAG, "main is null :<");
-	            } else {
-	                _main.login();
-	            }
-	            break;
+            case R.id.login:
+                if (_main == null) {
+                    Log.e(TAG, "main is null :<");
+                } else {
+                    if (_main.login()) {
+                        _login.setEnabled(false);
+                        _logout.setEnabled(true);   
+                    }
+                }   
+                break;
 	        case R.id.logout:
+                if (_main == null) {
+                    Log.e(TAG, "main is null :<");
+                } else {
+                    _main.logout();
+                    _login.setEnabled(true);
+                    _logout.setEnabled(false);
+                }
+                break;
 	        }
 	    }   
 	}
