@@ -2,10 +2,12 @@ package net.example.raccoonclient;
 
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -73,7 +75,10 @@ public class RaccClientActivity extends Activity {
         Log.e(TAG, "starting");
         setContentView(R.layout.main);
         Button b = (Button) findViewById(R.id.userpass);
-    	b.setOnClickListener(_buttonhandler);
+        b.setOnClickListener(_buttonhandler);
+        ( (Button) findViewById(R.id.userpass)).setOnClickListener(_buttonhandler);
+        ( (Button) findViewById(R.id.login)).setOnClickListener(_buttonhandler);
+        ( (Button) findViewById(R.id.logout)).setOnClickListener(_buttonhandler);
     	_h.post(_looper);
 	}
 
@@ -86,8 +91,11 @@ public class RaccClientActivity extends Activity {
                 startActivity(i);
                 break;
 	        case R.id.login:
-	            if (_main != null)
+	            if (_main == null) {
+	                Log.e(TAG, "main is null :<");
+	            } else {
 	                _main.login();
+	            }
 	            break;
 	        case R.id.logout:
 	        }
