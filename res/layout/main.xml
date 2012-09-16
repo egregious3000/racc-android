@@ -4,26 +4,36 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <TextView
+ <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal" >
+    
+   <TextView
         android:id="@+id/username"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Guest"
         android:textAppearance="?android:attr/textAppearanceLarge" />
-
-<TextView        android:id="@+id/hostname"
-        android:layout_width="fill_parent"
+    
+   <TextView        
+        android:id="@+id/hostname"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="bbs.iscabbs.com"
         android:textAppearance="?android:attr/textAppearanceSmall" />
-    
-    <Button
-        android:id="@+id/userpass"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="Change Username / Password" />
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+      <Button
+        android:id="@+id/userpass"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Change User / BBS" />
+
+   
+   
+   </LinearLayout>
+
+ <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal" >
@@ -34,13 +44,19 @@
         android:layout_height="wrap_content"
         android:text="Login" />
     
-      <Button
+   <Button
         android:id="@+id/logout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Logout"
         android:clickable="false" />
-   </LinearLayout>
-   
-    
+ </LinearLayout>   
+
+<ListView
+   android:id="@+id/forumlist"
+   android:layout_width="fill_parent" 
+   android:layout_height="wrap_content"
+   android:scrollbars = "vertical"	
+/>
+
 </LinearLayout>

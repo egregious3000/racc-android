@@ -1,5 +1,7 @@
 package net.example.raccoonclient;
 
+import java.util.ArrayList;
+
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -12,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 
 public class RaccClientActivity extends Activity {
@@ -22,11 +25,13 @@ public class RaccClientActivity extends Activity {
     private ClientMain _main;
     private boolean _isbound = false;
 
+    
     private ServiceConnection _connection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             Log.e(TAG, "onservice connected");
             _main = ((ClientMain.LocalBinder)service).getService();
-        }
+            onResume();
+            }
         public void onServiceDisconnected(ComponentName className) {
             _main = null;
         }
@@ -64,7 +69,9 @@ public class RaccClientActivity extends Activity {
     // End UI Loop Code
 
     Button _userpass, _login, _logout;
-	@Override
+    ForumListAdapter _list;
+    
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         doBindService(); // connect to _main
@@ -79,6 +86,8 @@ public class RaccClientActivity extends Activity {
         _login.setOnClickListener(_buttonhandler);
         _logout.setOnClickListener(_buttonhandler);
         _logout.setEnabled(false);
+        _list = new ForumListAdapter(this, R.layout.item, new ArrayList<Forum>());
+
         _h.post(_looper);
 	}
 
@@ -113,6 +122,20 @@ public class RaccClientActivity extends Activity {
 	    }   
 	}
  	
+	public void onResume() {
+	    super.onResume();
+	    Log.e(TAG, "Resuming");
+	    if (_main != null) {
+	        _list = new ForumListAdapter(this, R.layout.item, (ArrayList<Forum>) _main._forumlist.clone());
+	        Log.e(TAG, "remade forum list adapater");
+	        Log.e(TAG, "list size is " + _main._forumlist.size());
+	    }
+//	    _list.getFilter().filter(""); // <--- move this!
+	    _list.notifyDataSetChanged();
+	    ListView lv = (ListView)findViewById(R.id.forumlist);
+	    lv.setTextFilterEnabled(true);
+	    lv.setAdapter(_list);
+	}
 
 	
 	public void onDestroy() {
