@@ -23,8 +23,8 @@ public class UserPass extends Activity {
         	_password = (EditText) findViewById(R.id.password);
         	Intent i = this.getIntent();
         	Bundle b = i.getExtras();
-//        	_username.setText(b.getString("username"));
-//        	_password.setText(b.getString("password"));
+        	_username.setText(b.getString("username"));
+        	_password.setText(b.getString("password"));
         } catch (Exception e) {
         	Log.e(TAG, "Exception: " + e);
         }
@@ -33,10 +33,9 @@ public class UserPass extends Activity {
                     @Override
                     public void onClick(View v) {
                         Intent resultIntent = new Intent();
-                        resultIntent.putExtra("username", _username.getText()
-                                .toString());
-                        resultIntent.putExtra("password", _password.getText()
-                                .toString());
+                        resultIntent.putExtra("username", _username.getText().toString());
+                        resultIntent.putExtra("password", _password.getText().toString());
+                        Log.e(TAG, "sending out result_ok of " + Activity.RESULT_OK);
                         setResult(Activity.RESULT_OK, resultIntent);
                         finish();
                     }

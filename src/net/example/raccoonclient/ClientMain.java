@@ -12,23 +12,12 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Typeface;
 import android.os.Binder;
 import android.os.IBinder;
-import android.text.SpannableString;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
-import android.text.style.TypefaceSpan;
+import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Filter;
-import android.widget.TextView;
 
 public class ClientMain extends Service {
 
@@ -46,11 +35,10 @@ public class ClientMain extends Service {
 	public String _password = "default2";
 	public void setNewProfile(String username, String password) {
 		Log.e(TAG, "setting new profile now");
-		_username = username;
-		_password = password;
-	
-		SharedPreferences.Editor editor = _preferences.edit();
-		editor.putString("username", username);
+        _username = username;
+        _password = password;
+        SharedPreferences.Editor editor = _preferences.edit();
+        editor.putString("username", username);
 		editor.putString("password", password);
 		editor.commit();
 	}
@@ -71,7 +59,7 @@ public class ClientMain extends Service {
 	    Log.e(TAG, "login got " + r[0]);
 	    
 	    // XXX send "LOGIN Username    Password\n" here
-	    String[] lines = writeline("LIST\n");
+	    String[] lines = writeline("LIST TODO\n");
 	    Log.e(TAG, "list is length " + lines.length);
         _forumlist.clear();
 	    for (String line : lines) {
@@ -248,9 +236,11 @@ public class ClientMain extends Service {
 	
 	@Override
 	public void onCreate() {
-	    _username = "default3";
-	    _password = "default4";
-		Log.e(TAG, "onCreate");		
+        _preferences = PreferenceManager.getDefaultSharedPreferences(ClientMain.this);
+        _username = _preferences.getString("username", "Guest");
+        _password = _preferences.getString("password", "");
+        
+        Log.e(TAG, "onCreate");		
 		
 	}
 	
