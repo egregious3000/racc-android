@@ -15,6 +15,13 @@
         android:layout_height="wrap_content"
         android:text="Guest"
         android:textAppearance="?android:attr/textAppearanceLarge" />
+
+      <Button
+        android:id="@+id/change"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Change User / BBS" />
+
     
    <TextView        
         android:id="@+id/hostname"
@@ -22,14 +29,7 @@
         android:layout_height="wrap_content"
         android:text="bbs.iscabbs.com"
         android:textAppearance="?android:attr/textAppearanceSmall" />
-
-      <Button
-        android:id="@+id/userpass"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Change User / BBS" />
-
-   
+      
    
    </LinearLayout>
 

@@ -28,9 +28,8 @@ public class UserPass extends Activity {
         } catch (Exception e) {
         	Log.e(TAG, "Exception: " + e);
         }
-        Button b = (Button) findViewById(R.id.userpass);
-        ((Button) findViewById(R.id.done))
-                .setOnClickListener(new View.OnClickListener() {
+        Button b = (Button) findViewById(R.id.done);
+        b.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Intent resultIntent = new Intent();

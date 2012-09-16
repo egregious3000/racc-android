@@ -74,28 +74,31 @@ public class RaccClientActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        doBindService(); // connect to _main
-        Log.e(TAG, "starting");
-        setContentView(R.layout.main);
-        Button b = (Button) findViewById(R.id.userpass);
-        b.setOnClickListener(_buttonhandler);
-        _userpass = (Button) findViewById(R.id.userpass);
-        _login  = (Button) findViewById(R.id.login);
-        _logout = (Button) findViewById(R.id.logout);
-        _userpass.setOnClickListener(_buttonhandler);
-        _login.setOnClickListener(_buttonhandler);
-        _logout.setOnClickListener(_buttonhandler);
-        _logout.setEnabled(false);
-        _list = new ForumListAdapter(this, R.layout.item, new ArrayList<Forum>());
-
-        _h.post(_looper);
-	}
+        try {
+            doBindService(); // connect to _main
+            Log.e(TAG, "starting");
+            setContentView(R.layout.main);
+            _userpass = (Button) findViewById(R.id.change);
+            _login  = (Button) findViewById(R.id.login);
+            _logout = (Button) findViewById(R.id.logout);
+            _userpass.setOnClickListener(_buttonhandler);
+            _login.setOnClickListener(_buttonhandler);
+            _logout.setOnClickListener(_buttonhandler);
+            _logout.setEnabled(false);
+            _list = new ForumListAdapter(this, R.layout.item, new ArrayList<Forum>());
+    
+            _h.post(_looper);
+        } catch (Exception e) {
+            Log.e(TAG, "Creation Exception", e);
+        }
+        
+    }
 
 	private ButtonHandler _buttonhandler = new ButtonHandler();
 	private class ButtonHandler implements OnClickListener {
 	    public void onClick(View src) {
 	        switch (src.getId()) {
-	        case R.id.userpass:
+	        case R.id.change:
                 Intent i = new Intent(RaccClientActivity.this, UserPass.class);
                 startActivity(i);
                 break;
@@ -125,18 +128,20 @@ public class RaccClientActivity extends Activity {
 	public void onResume() {
 	    super.onResume();
 	    Log.e(TAG, "Resuming");
-	    if (_main != null) {
-	        _list = new ForumListAdapter(this, R.layout.item, (ArrayList<Forum>) _main._forumlist.clone());
-	        Log.e(TAG, "remade forum list adapater");
-	        Log.e(TAG, "list size is " + _main._forumlist.size());
+	    try { 
+    	    if (_main != null) {
+    	        _list = new ForumListAdapter(this, R.layout.item, (ArrayList<Forum>) _main._forumlist.clone());
+    	        Log.e(TAG, "remade forum list adapater");
+    	        Log.e(TAG, "list size is " + _main._forumlist.size());
+    	    }
+    	    _list.notifyDataSetChanged();
+    	    ListView lv = (ListView)findViewById(R.id.forumlist);
+    	    lv.setTextFilterEnabled(true);
+    	    lv.setAdapter(_list);
+	    } catch (Exception e) {
+	        Log.e(TAG, "resuming exception", e);
 	    }
-//	    _list.getFilter().filter(""); // <--- move this!
-	    _list.notifyDataSetChanged();
-	    ListView lv = (ListView)findViewById(R.id.forumlist);
-	    lv.setTextFilterEnabled(true);
-	    lv.setAdapter(_list);
 	}
-
 	
 	public void onDestroy() {
 	    _killed = true;
