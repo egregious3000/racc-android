@@ -4,31 +4,50 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
+    <TextView
+        android:text="@string/hint_hostname"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="12" />
     <EditText
     	android:id="@+id/hostname"
-		android:hint="Hostname of BBS"
+		android:hint="@string/hint_hostname"
         android:text="@string/default_bbs"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="16" />
+    <TextView
+        android:text="@string/hint_port"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="12" />
     <EditText
     	android:id="@+id/port"
-        android:text="6145"
+	    android:inputType="text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="16" />
-    
-<EditText
+    <TextView
+        android:text="@string/hint_user"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="12" />
+    <EditText
     	android:id="@+id/username"
-		android:hint="Username"
-        android:text="Username"
+		android:hint="@string/hint_user"
+        android:text="@string/guest"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="16" />
-<EditText
+    <TextView
+        android:text="@string/text_pass"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:ems="12" />
+    <EditText
     	android:id="@+id/password"
-		android:hint="Password"
-        android:text="Password"
+		android:hint="@string/hint_pass"
+        android:text=""
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:inputType="textPassword"
@@ -37,7 +56,7 @@
         android:id="@+id/done"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Done!" />
+        android:text="@string/done" />
 
 
 </LinearLayout>

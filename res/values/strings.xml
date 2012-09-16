@@ -7,5 +7,11 @@
     <string name="default_bbs">bbs.iscabbs.com</string>
     <string name="login">Login</string>
     <string name="logout">Logout</string>
- 
+    <string name="hint_hostname">Hostname of BBS</string>
+	<string name="hint_port">Port of Raccoon port (usually 6145)</string>
+    <string name="hint_user">Username (or "Guest")</string>
+    <string name="text_pass">Password (stored in preferences)</string>
+    <string name="hint_pass">Password</string>
+  	<string name="done">Done!</string>
 </resources>
+
