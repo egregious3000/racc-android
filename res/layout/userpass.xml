@@ -7,7 +7,7 @@
     <EditText
     	android:id="@+id/hostname"
 		android:hint="Hostname of BBS"
-        android:text="bbs.iscabbs.com"
+        android:text="@string/default_bbs"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="16" />

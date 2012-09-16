@@ -13,21 +13,21 @@
         android:id="@+id/username"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Guest"
+        android:text="@string/guest"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
       <Button
         android:id="@+id/change"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Change User / BBS" />
+        android:text="@string/change" />
 
     
    <TextView        
         android:id="@+id/hostname"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="bbs.iscabbs.com"
+        android:text="@string/default_bbs"
         android:textAppearance="?android:attr/textAppearanceSmall" />
       
    
@@ -42,13 +42,13 @@
         android:id="@+id/login"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Login" />
+        android:text="@string/login" />
     
    <Button
         android:id="@+id/logout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Logout"
+        android:text="@string/logout"
         android:clickable="false" />
  </LinearLayout>   
 

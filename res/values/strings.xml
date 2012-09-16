@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Raccoon Client</string>
+    <string name="change">Change User / BBS</string>
+    <string name="guest">Guest</string> <!--  do not change for other languages -->
+    <string name="default_bbs">bbs.iscabbs.com</string>
+    <string name="login">Login</string>
+    <string name="logout">Logout</string>
+ 
+</resources>
