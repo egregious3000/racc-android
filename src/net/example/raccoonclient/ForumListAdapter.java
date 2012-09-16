@@ -49,7 +49,7 @@ public class ForumListAdapter extends ArrayAdapter<Forum> {
         try {
             Forum f = _filtered.get(position);
             TextView tv = (TextView) v;
-            tv.setText(f._name);
+            tv.setText(f.getHeader());
         } catch (Exception e) {
             Log.e(TAG, "getview got exception: ", e);
         }

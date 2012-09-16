@@ -57,6 +57,11 @@ public class ClientMain extends Service {
         }
 	    String[] r = readlines();
 	    Log.e(TAG, "login got " + r[0]);
+	
+	    r = writeline("LOGIN\t" + _username + "\t" + _password + "\n");
+	    for (String s : r) {
+	        Log.e(TAG, "line is " + s);
+	    }
 	    
 	    // XXX send "LOGIN Username    Password\n" here
 	    String[] lines = writeline("LIST TODO\n");
