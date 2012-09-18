@@ -12,20 +12,154 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.DataSetObserver;
 import android.os.Binder;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Adapter;
+import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
+import android.widget.TextView;
 
 public class ClientMain extends Service {
-
     
-    ArrayList<Forum> _forumlist = new ArrayList<Forum>();
+    abstract public class Thingy {
+        abstract public String getHeader();
+        abstract public int getNumber();
+    }
+ 
+    public class Forum extends Thingy {
+
+        int _number;
+        String _name = "x";
+        int _lastnote;
+        String _flags = "";
+        int _todo;
+        
+//        topic:180       name:Stereo And Electronic Technology   lastnote:64104  flags:nosubject,sparse  admin:acct579504-oldisca/Copper Lethe/(hidden)  todo:1
+//        topic:0   name:Lobby  lastnote:2379   flags:nosubject,sparse  admin:acct578247-oldisca/(Unknown ISCABBS User)/(hidden)
+        Forum(String s) {
+            String[] fields = s.split("\t");
+            for (String f : fields) {
+                String[] k = f.split(":");
+                if (k[0].equals("topic"))
+                    _number = Integer.parseInt(k[1]);
+                if (k[0].equals("name"))
+                    _name = k[1];
+                if (k[0].equals("lastnote"))
+                    _lastnote = Integer.parseInt(k[1]);
+                if (k[0].equals("flags"))
+                    _flags = k[1];
+                if (k[0].equals("todo"))
+                    _todo = Integer.parseInt(k[1]);
+            }
+        }
+        public int getNumber() { return _number; }
+        public String getHeader() {
+            if (_todo == 0)
+                return _name;
+            else
+                return (_name + " (" + _todo + ")"); 
+        }
+    }
+
+    public class Message extends Thingy {
+
+        int _number;
+        String _subject = "y";
+        
+        // noteno:201642   subject:Fucking hackers! If I could ever find you, I would see that     size:115
+
+        // noteno:78049    formal-author:acct550746-oldisca/Danix/(hidden) date:Tue, 18 Sep 2012 00:42:00 GMT      subject:Feoh> heh, yes you have to back up your zone files. I had       size:192
+
+        Message(String s) {
+            String[] fields = s.split("\t");
+            for (String f : fields) {
+                String[] k = f.split(":");
+                if (k[0].equals("noteno"))
+                    _number = Integer.parseInt(k[1]);
+                if (k[0].equals("subject"))
+                    _subject = k[1];
+            }
+        }
+
+        public int getNumber() { return _number; }
+        public String getHeader() { return _subject; }
+    }
+
+//    _list = new ArrayAdapter(this, R.layout.item, _main._currentlist);
+    abstract class ThingyList extends ArrayList<Thingy> {};
+    class ForumList extends ThingyList { };
+    class MessageList extends ThingyList { };
+    
+    //     public ForumListAdapter(Context context, int resource, ArrayList<Forum> objects) {    
+
+    public class ThingyListAdapter extends ArrayAdapter<Thingy> {
+        ThingyListAdapter(Context c, int resource, ArrayList<Thingy> objects) {
+            super(c, resource, objects);
+            _context = c;
+            _things = (ArrayList<Thingy>) objects.clone();
+        }
+        private ArrayList<Thingy> _things;
+        private Context _context;
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View v = convertView;
+            if (v == null) {
+                LayoutInflater vi = (LayoutInflater) _context.getSystemService
+                        (Context.LAYOUT_INFLATER_SERVICE);
+                v = vi.inflate(R.layout.item, null);
+            }
+            try {
+                Thingy t = _things.get(position);
+                TextView tv = (TextView) v;
+                tv.setText(t.getHeader());
+            } catch (Exception e) {
+                Log.e(TAG, "getview got exception: ", e);
+            }
+            return v;
+        }
+    }
+
+//    public class ForumListAdapter extends ThingyListAdapter { }
+ //   public class MessageListAdapter extends ThingyListAdapter { }
+    
+    
+    ForumList _forumlist = new ForumList();
+    MessageList _messagelist = new MessageList();
+    ThingyList _currentlist = _forumlist;
+    
+    public boolean changeToForum(int i) {
+        assert (_state == State.FORUM_LIST);
+        _state = State.MESSAGE_LIST;
+        Log.e(TAG, "switching to forum " + i);
+        String[] lines2 = writeline("TOPIC " + i + "\n");
+        
+        
+        String[] lines = writeline("XHDR subject\n");
+        Log.e(TAG, "list is length " + lines.length);
+        _messagelist.clear();
+        for (String line : lines) {
+            if (line.charAt(0) == '3')
+                continue;
+            if (line.charAt(0) == '.')
+                break;
+            Message m = new Message(line);
+            _messagelist.add(m);
+        }
+        _currentlist = _messagelist;
+        return true;
+    }
     
 	SharedPreferences _preferences;
-	public static enum State { INITIAL, LOGGING_IN, CONNECTED };
+	public static enum State { INITIAL, LOGGING_IN, FORUM_LIST, MESSAGE_LIST };
 	private static final String TAG = "Client Main";
 	public State _state = State.INITIAL;  // readable by code
 	public String _status = "Not connected"; // readable by humans
@@ -64,20 +198,21 @@ public class ClientMain extends Service {
 	    }
 	    
 	    // XXX send "LOGIN Username    Password\n" here
-	    String[] lines = writeline("LIST TODO\n");
-	    Log.e(TAG, "list is length " + lines.length);
+        String[] lines = writeline("LIST TODO\n");
+        Log.e(TAG, "list is length " + lines.length);
         _forumlist.clear();
-	    for (String line : lines) {
-	        if (line.charAt(0) == '3')
-	            continue;
-	        if (line.charAt(0) == '.')
-	            break;
-	        Forum f = new Forum(line);
-	        _forumlist.add(f);
-	    }
-	    return true;
+        for (String line : lines) {
+            if (line.charAt(0) == '3')
+                continue;
+            if (line.charAt(0) == '.')
+                break;
+            Forum f = new Forum(line);
+            _forumlist.add(f);
+        }
+        _state = State.FORUM_LIST;
+        return true;
 	}
-
+	
 	public void logout() {
 	    Log.w(TAG, "logging out");
 	    if (_s == null)

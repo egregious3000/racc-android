@@ -21,7 +21,7 @@ public class ForumListAdapter extends ArrayAdapter<Forum> {
     }*/
     
      private final String TAG = "CLA";
-    ArrayList<Forum> _items = new ArrayList<Forum>();
+     ArrayList<Forum> _items = new ArrayList<Forum>();
     ArrayList<Forum> _filtered; 
     private Context _context;
     private Filter _filter;

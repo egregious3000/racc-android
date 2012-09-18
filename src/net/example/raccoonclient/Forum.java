@@ -1,5 +1,4 @@
 package net.example.raccoonclient;
-
 public class Forum {
 
     int _number;
@@ -32,5 +31,6 @@ public class Forum {
         else
             return (_name + " (" + _todo + ")"); 
     }
+
     
 }
