@@ -71,8 +71,8 @@ public class RaccClientActivity extends Activity {
     }
     // End UI Loop Code
 
-    TextView _usernametextfield, _post;
-    Button _userpass, _login, _logout;
+    TextView _usernametextfield, _message;
+    Button _userpass, _login, _logout, _back, _post;
 //    ForumListAdapter _list;
 //    ArrayAdapter<ClientMain.Thingy> _list;
     ClientMain.ThingyListAdapter _list;
@@ -82,12 +82,18 @@ public class RaccClientActivity extends Activity {
 	private class ButtonHandler implements OnClickListener {
 	    public void onClick(View src) {
 	        switch (src.getId()) {
-	        case R.id.change:
-	            assert(_main != null);
-	            Intent i = new Intent(RaccClientActivity.this, UserPass.class);
+            case R.id.change:
+                assert(_main != null);
+                Intent i = new Intent(RaccClientActivity.this, UserPass.class);
                 i.putExtra("username", _main._username);
                 i.putExtra("password", _main._password);
                 startActivityForResult(i, 127);
+                break;
+            case R.id.post:
+                assert(_main != null);
+                Intent i2 = new Intent(RaccClientActivity.this, WritePost.class);
+                i2.putExtra("forumname", "placeholder");
+                startActivityForResult(i2, 129);
                 break;
             case R.id.login:
                 if (_main == null) {
@@ -100,7 +106,7 @@ public class RaccClientActivity extends Activity {
                     }
                 }   
                 break;
-	        case R.id.logout:
+            case R.id.logout:
                 if (_main == null) {
                     Log.e(TAG, "main is null :<");
                 } else {
@@ -109,6 +115,10 @@ public class RaccClientActivity extends Activity {
                     _logout.setEnabled(false);
                 }
                 break;
+            case R.id.back:
+                _main.back();
+                onResume();
+                break;
 	        }
 	    }   
 	}
@@ -116,16 +126,24 @@ public class RaccClientActivity extends Activity {
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 	    super.onActivityResult(requestCode, resultCode, data);
 	    Log.e(TAG, "result is here, " + requestCode + " with " + resultCode);
-	    if (requestCode == 127) {
-	        if (resultCode == Activity.RESULT_OK) {
-	            assert(_main != null);
-	            Bundle b = data.getExtras();
-	            _username = b.getString("username");
-	            _password = b.getString("password");
-	            _usernametextfield.setText(_username);
-	            _main.setNewProfile(_username, _password);
-	        }
-	    }
+        if (requestCode == 127) {
+            if (resultCode == Activity.RESULT_OK) {
+                assert(_main != null);
+                Bundle b = data.getExtras();
+                _username = b.getString("username");
+                _password = b.getString("password");
+                _usernametextfield.setText(_username);
+                _main.setNewProfile(_username, _password);
+            }
+        }
+        if (requestCode == 129) {
+            if (resultCode == Activity.RESULT_OK) {
+                assert(_main != null);
+                Bundle b = data.getExtras();
+                String thepost = b.getString("thepost");
+                _main.post(thepost);
+            }
+        }
 	}
 	
     // Start lifecycle code
@@ -140,11 +158,15 @@ public class RaccClientActivity extends Activity {
             _userpass = (Button) findViewById(R.id.change);
             _login  = (Button) findViewById(R.id.login);
             _logout = (Button) findViewById(R.id.logout);
+            _back = (Button) findViewById(R.id.back);
+            _post = (Button) findViewById(R.id.post);
             _userpass.setOnClickListener(_buttonhandler);
             _login.setOnClickListener(_buttonhandler);
             _logout.setOnClickListener(_buttonhandler);
+            _back.setOnClickListener(_buttonhandler);
+            _post.setOnClickListener(_buttonhandler);
             _logout.setEnabled(false);
-            _post = (TextView) findViewById(R.id.post);
+            _message = (TextView) findViewById(R.id.message);
             //            _list = new ForumListAdapter(this, R.layout.item, new ArrayList<Forum>());
             _h.post(_looper);
         } catch (Exception e) {
@@ -158,7 +180,35 @@ public class RaccClientActivity extends Activity {
 	    Log.e(TAG, "Resuming");
 	    try { 
     	    if (_main != null) {
+    	        switch (_main._state) {
+    	        case INITIAL:
+                    _login.setEnabled(true);
+                    _logout.setEnabled(false);
+                    _back.setEnabled(false);
+                    _post.setEnabled(false);
+                    break;
+    	        case LOGGING_IN:
+                    _login.setEnabled(false);
+                    _logout.setEnabled(true);
+                    _back.setEnabled(false);
+                    _post.setEnabled(false);
+                    break;
+    	        case FORUM_LIST:
+                    _login.setEnabled(false);
+                    _logout.setEnabled(true);
+                    _back.setEnabled(false);
+                    _post.setEnabled(false);
+                    break;
+    	        case MESSAGE_LIST:
+    	        case SHOW_POST:
+                    _login.setEnabled(false);
+                    _logout.setEnabled(true);
+                    _back.setEnabled(true);
+                    _post.setEnabled(true);
+                    break;
+    	        }
 ///    	        _list = new ForumListAdapter(this, R.layout.item, (ArrayList<Forum>) _main._forumlist.clone());
+                _message.setText(TextUtils.join("\n", _main._post));
                 _list = _main.new ThingyListAdapter(this, R.layout.item, _main._currentlist);
     	        Log.e(TAG, "remade forum list adapater");
     	        Log.e(TAG, "list size is " + _main._forumlist.size());
@@ -183,7 +233,6 @@ public class RaccClientActivity extends Activity {
                     } else if (_main._state == ClientMain.State.MESSAGE_LIST) {
                         Log.e(TAG, "xxx");
                         _main.getMessage(t.getNumber());
-                        _post.setText(TextUtils.join("\n", _main._post));
                         onResume();
                     }
                     //                    Intent i = new Intent(RaccClientActivity.this, ForumActivity.class);
