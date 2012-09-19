@@ -134,11 +134,38 @@ public class ClientMain extends Service {
     
     ForumList _forumlist = new ForumList();
     MessageList _messagelist = new MessageList();
-    MessageList _emptylist = new MessageList();
     ThingyList _currentlist = _forumlist;
     String[] _post = { };
+    MessageList _emptylist = new MessageList();
+    String[] _emptypost = { };
+
+    public boolean post(String s) {
+        String[] lines = writeline("POST\n", 1);
+        String[] test = writeline(s + "\n.\n");
+        for (String t : test) 
+            Log.e(TAG, "post returned " + t);
+        return true;
+    }
+
+    public boolean back() {
+        Log.e(TAG, "state is " + _state + " and messagelist size is " + _messagelist.size());
+        if (_state == State.SHOW_POST) {
+            _state = State.MESSAGE_LIST;
+            _post = _emptypost;
+            _currentlist = _messagelist;
+            return true;
+        }
+        if (_state == State.MESSAGE_LIST) {
+            _state = State.FORUM_LIST;
+            _currentlist = _forumlist;
+            return true;
+        }
+        return true;
+    }
     
     public boolean getMessage(int i) {
+        assert (_state == State.MESSAGE_LIST);
+        _state = State.SHOW_POST;
         String[] lines = writeline("READ " + i + "\n");
         _post = lines;
         _currentlist = _emptylist;
@@ -159,7 +186,7 @@ public class ClientMain extends Service {
         }
         lines2 = writeline("SHOW rcval\n");
         fields = lines2[0].split("\\t");
-        String firstnote = fields[1];
+        String firstnote = (fields.length > 1) ?  fields[1] : "";
         
         String[] lines = writeline("XHDR subject " + firstnote + "-" + lastnote + "\n");
         Log.e(TAG, "list is length " + lines.length);
@@ -177,7 +204,7 @@ public class ClientMain extends Service {
     }
     
 	SharedPreferences _preferences;
-	public static enum State { INITIAL, LOGGING_IN, FORUM_LIST, MESSAGE_LIST };
+	public static enum State { INITIAL, LOGGING_IN, FORUM_LIST, MESSAGE_LIST, SHOW_POST };
 	private static final String TAG = "Client Main";
 	public State _state = State.INITIAL;  // readable by code
 	public String _status = "Not connected"; // readable by humans
@@ -285,9 +312,12 @@ public class ClientMain extends Service {
 	// Otherwise returns 1 String.
 	// Each String is a line.
 	// Promises to return at least 1 String.
-	private String[] readlines() { 	    
+	private String[] readlines() { return readlines(null); }
+	private String[] readlines(Integer mode) {
 	    assert (_s != null);
 	    int state = 0; // 0 = new, 1 = singleline, 2 = multiline
+	    if (mode != null)
+	        state = mode;
 	    ArrayList<StringBuilder> ret = new ArrayList<StringBuilder>();
 	    ret.add(new StringBuilder(""));
 	    try {
@@ -353,7 +383,8 @@ public class ClientMain extends Service {
 	    
 	}
 
-	public String[] writeline(String msg) {
+	private String[] writeline(String msg) { return writeline(msg, null); }
+    private String[] writeline(String msg, Integer mode) {
         assert (_s != null);
 	    OutputStream outs;
 	    try {
@@ -367,7 +398,7 @@ public class ClientMain extends Service {
         } catch (Exception e) {
             Log.e(TAG, "Other error", e);
         }
-	    return readlines();
+	    return readlines(mode);
 	}
 
 	
