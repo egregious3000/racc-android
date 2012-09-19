@@ -134,16 +134,34 @@ public class ClientMain extends Service {
     
     ForumList _forumlist = new ForumList();
     MessageList _messagelist = new MessageList();
+    MessageList _emptylist = new MessageList();
     ThingyList _currentlist = _forumlist;
+    String[] _post = { };
+    
+    public boolean getMessage(int i) {
+        String[] lines = writeline("READ " + i + "\n");
+        _post = lines;
+        _currentlist = _emptylist;
+        return true;
+    }
     
     public boolean changeToForum(int i) {
         assert (_state == State.FORUM_LIST);
         _state = State.MESSAGE_LIST;
         Log.e(TAG, "switching to forum " + i);
         String[] lines2 = writeline("TOPIC " + i + "\n");
+        String[] fields = lines2[0].split("\\t");
+        String lastnote = "";
+        for (String s: fields) {
+            if (s.startsWith("lastnote")) {
+                s = s.substring(9);
+            }
+        }
+        lines2 = writeline("SHOW rcval\n");
+        fields = lines2[0].split("\\t");
+        String firstnote = fields[1];
         
-        
-        String[] lines = writeline("XHDR subject\n");
+        String[] lines = writeline("XHDR subject " + firstnote + "-" + lastnote + "\n");
         Log.e(TAG, "list is length " + lines.length);
         _messagelist.clear();
         for (String line : lines) {

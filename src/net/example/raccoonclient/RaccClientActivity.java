@@ -9,6 +9,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -70,7 +71,7 @@ public class RaccClientActivity extends Activity {
     }
     // End UI Loop Code
 
-    TextView _usernametextfield;
+    TextView _usernametextfield, _post;
     Button _userpass, _login, _logout;
 //    ForumListAdapter _list;
 //    ArrayAdapter<ClientMain.Thingy> _list;
@@ -143,7 +144,8 @@ public class RaccClientActivity extends Activity {
             _login.setOnClickListener(_buttonhandler);
             _logout.setOnClickListener(_buttonhandler);
             _logout.setEnabled(false);
-//            _list = new ForumListAdapter(this, R.layout.item, new ArrayList<Forum>());
+            _post = (TextView) findViewById(R.id.post);
+            //            _list = new ForumListAdapter(this, R.layout.item, new ArrayList<Forum>());
             _h.post(_looper);
         } catch (Exception e) {
             Log.e(TAG, "Creation Exception", e);
@@ -177,6 +179,11 @@ public class RaccClientActivity extends Activity {
                     if (_main._state == ClientMain.State.FORUM_LIST) {
                         Log.e(TAG, "xxx");
                         _main.changeToForum(t.getNumber());
+                        onResume();
+                    } else if (_main._state == ClientMain.State.MESSAGE_LIST) {
+                        Log.e(TAG, "xxx");
+                        _main.getMessage(t.getNumber());
+                        _post.setText(TextUtils.join("\n", _main._post));
                         onResume();
                     }
                     //                    Intent i = new Intent(RaccClientActivity.this, ForumActivity.class);
