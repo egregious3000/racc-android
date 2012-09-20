@@ -246,6 +246,25 @@ public class RaccClientActivity extends Activity {
 	    }
 	}
 	
+	// go back, unless we are at the top
+	@Override
+	public void onBackPressed() {
+	    if (_main == null)
+	        return;
+	    switch (_main._state) {
+	    case INITIAL:
+	    case LOGGING_IN:
+	        super.onBackPressed();
+	        break;
+        case FORUM_LIST:
+            _main.logout();
+            break;
+	    }
+	    _main.back();
+	    onResume();
+	}
+
+	
 	public void onDestroy() {
 	    _killed = true;
 	    doUnbindService();
