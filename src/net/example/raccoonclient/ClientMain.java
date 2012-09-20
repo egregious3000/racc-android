@@ -139,8 +139,17 @@ public class ClientMain extends Service {
     MessageList _emptylist = new MessageList();
     String[] _emptypost = { };
 
+    
     public boolean post(String s) {
-        String[] lines = writeline("POST\n", 1);
+        String[] lines = writeline("OKAY POST\n", 1);
+        Log.e(TAG, "count of lines is " + lines.length);
+        for (String line : lines)
+            Log.e(TAG, "line is " + line);
+        if (lines[0].charAt(0) == '4') {
+            Log.e(TAG, "error with posting: " + lines[0]);
+            return false;
+        }
+        writeline("POST\n", 1);
         String[] test = writeline(s + "\n.\n");
         for (String t : test) 
             Log.e(TAG, "post returned " + t);
@@ -183,11 +192,16 @@ public class ClientMain extends Service {
             if (s.startsWith("lastnote")) {
                 s = s.substring(9);
             }
+            if (s.startsWith("name")) {
+                _forumname = s.substring(5);
+            }
         }
-        lines2 = writeline("SHOW rcval\n");
-        fields = lines2[0].split("\\t");
-        String firstnote = (fields.length > 1) ?  fields[1] : "";
-        
+        String firstnote = "";
+        if (_forummode == R.id.radio_unread) {
+            lines2 = writeline("SHOW rcval\n");
+            fields = lines2[0].split("\\t");
+            firstnote = (fields.length > 1) ?  fields[1] : "";
+        }
         String[] lines = writeline("XHDR subject " + firstnote + "-" + lastnote + "\n");
         Log.e(TAG, "list is length " + lines.length);
         _messagelist.clear();
@@ -208,7 +222,8 @@ public class ClientMain extends Service {
 	private static final String TAG = "Client Main";
 	public State _state = State.INITIAL;  // readable by code
 	public String _status = "Not connected"; // readable by humans
-	
+	public int _forumnumber = 0;
+	public String _forumname = "Lobby";
 	
 	public String _username = "default1";
 	public String _password = "default2";
@@ -224,8 +239,11 @@ public class ClientMain extends Service {
 	
 	private Socket _s = null;
 
+	public int _forummode = R.id.radio_unread;
+	
 	// Returns success if we log in
 	public boolean login() {
+        _state = State.LOGGING_IN;
 	    Log.w(TAG, "logging in");
 	    try {
             _s = new Socket("bbs.iscabbs.com", 6145);
@@ -241,9 +259,25 @@ public class ClientMain extends Service {
 	    for (String s : r) {
 	        Log.e(TAG, "line is " + s);
 	    }
-	    
+        _state = State.FORUM_LIST;
+	    return grab_forums();
+	}
+	
+	public boolean grab_forums() {
+	    if (_state != State.FORUM_LIST) 
+	        return false;
+	    if (_s == null) {
+	        Log.e(TAG, "trying to load forums when socket is null");
+	        return false;
+	    }
 	    // XXX send "LOGIN Username    Password\n" here
-        String[] lines = writeline("LIST TODO\n");
+	    String mode = "";
+	    switch (_forummode) {
+        case R.id.radio_unread:    mode = "TODO"; break;    
+        case R.id.radio_joined:    mode = "JOINED"; break;
+        case R.id.radio_all:       mode = "ALL"; break;
+	    }
+	    String[] lines = writeline("LIST " + mode + "\n");
         Log.e(TAG, "list is length " + lines.length);
         _forumlist.clear();
         for (String line : lines) {
@@ -269,6 +303,8 @@ public class ClientMain extends Service {
             Log.e(TAG, "IO Exception on close", e);
         }
 	    _s = null;
+	    _state = State.INITIAL;
+
 	}
 
 	// returns index of \n or -1
@@ -385,8 +421,8 @@ public class ClientMain extends Service {
 
 	private String[] writeline(String msg) { return writeline(msg, null); }
     private String[] writeline(String msg, Integer mode) {
-        assert (_s != null);
-	    OutputStream outs;
+        if (_s == null) return _emptypost;
+        OutputStream outs;
 	    try {
             outs = _s.getOutputStream();
             byte[] send = msg.getBytes("UTF-8");
@@ -433,7 +469,9 @@ public class ClientMain extends Service {
 		
 	}
 	
-	public void mainLoop() {
+
+	
+	public void obsolete_mainLoop() {
 		boolean waiting = false;
 		if (waiting) return;
 	}

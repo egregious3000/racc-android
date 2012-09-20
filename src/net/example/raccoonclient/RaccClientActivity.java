@@ -92,7 +92,8 @@ public class RaccClientActivity extends Activity {
             case R.id.post:
                 assert(_main != null);
                 Intent i2 = new Intent(RaccClientActivity.this, WritePost.class);
-                i2.putExtra("forumname", "placeholder");
+                i2.putExtra("forumname", _main._forumname);
+                
                 startActivityForResult(i2, 129);
                 break;
             case R.id.login:
@@ -121,6 +122,12 @@ public class RaccClientActivity extends Activity {
                 break;
 	        }
 	    }   
+	}
+
+	public void onRadioButtonClicked(View v) {
+	    _main._forummode = v.getId();
+	    _main.grab_forums();
+	    onResume();
 	}
 
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {

@@ -22,10 +22,10 @@ public class WritePost extends Activity {
         setContentView(R.layout.writepost);
         try {
             _thepost = (EditText) findViewById(R.id.postText);
-            _header = (EditText) findViewById(R.id.header);
+            _header = (TextView) findViewById(R.id.header);
             Intent i = this.getIntent();
             Bundle b = i.getExtras();
-            _header.setText(b.getString("forumname"));
+            _header.setText("Posting to " + b.getString("forumname"));
         } catch (Exception e) {
             Log.e(TAG, "Exception: " + e);
         }
