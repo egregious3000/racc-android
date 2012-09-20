@@ -141,13 +141,15 @@ public class ClientMain extends Service {
 
     
     public boolean post(String s) {
+        Log.d(TAG, "posting something");
+        Log.v(TAG, "posting " + s);
         String[] lines = writeline("OKAY POST\n", 1);
-        Log.e(TAG, "count of lines is " + lines.length);
-        for (String line : lines)
-            Log.e(TAG, "line is " + line);
-        if (lines[0].charAt(0) == '4') {
+        if (lines.length == 0 || lines[0].charAt(0) == '4') {
             Log.e(TAG, "error with posting: " + lines[0]);
             return false;
+        }
+        if (lines[0].charAt(0) != '2') {
+            Log.e(TAG, "PROTOCOL ERROR.  We are mis-aligned. " +  lines[0]);
         }
         writeline("POST\n", 1);
         String[] test = writeline(s + "\n.\n");
@@ -157,7 +159,7 @@ public class ClientMain extends Service {
     }
 
     public boolean back() {
-        Log.e(TAG, "state is " + _state + " and messagelist size is " + _messagelist.size());
+        Log.d(TAG, "state is " + _state + " and messagelist size is " + _messagelist.size());
         if (_state == State.SHOW_POST) {
             _state = State.MESSAGE_LIST;
             _post = _emptypost;
@@ -184,13 +186,14 @@ public class ClientMain extends Service {
     public boolean changeToForum(int i) {
         assert (_state == State.FORUM_LIST);
         _state = State.MESSAGE_LIST;
-        Log.e(TAG, "switching to forum " + i);
+        Log.d(TAG, "switching to forum " + i);
         String[] lines2 = writeline("TOPIC " + i + "\n");
+        if (lines2.length == 0) return false;
         String[] fields = lines2[0].split("\\t");
         String lastnote = "";
         for (String s: fields) {
             if (s.startsWith("lastnote")) {
-                s = s.substring(9);
+                lastnote = s.substring(9);
             }
             if (s.startsWith("name")) {
                 _forumname = s.substring(5);
@@ -203,7 +206,6 @@ public class ClientMain extends Service {
             firstnote = (fields.length > 1) ?  fields[1] : "";
         }
         String[] lines = writeline("XHDR subject " + firstnote + "-" + lastnote + "\n");
-        Log.e(TAG, "list is length " + lines.length);
         _messagelist.clear();
         for (String line : lines) {
             if (line.charAt(0) == '3')
@@ -249,8 +251,10 @@ public class ClientMain extends Service {
             _s = new Socket("bbs.iscabbs.com", 6145);
         } catch (UnknownHostException e) {
             Log.e(TAG, "unknown host", e);
+            return false;
         } catch (IOException e) {
             Log.e(TAG, "io exception", e);
+            return false;
         }
 	    String[] r = readlines();
 	    Log.e(TAG, "login got " + r[0]);
@@ -294,6 +298,7 @@ public class ClientMain extends Service {
 	
 	public void logout() {
 	    Log.w(TAG, "logging out");
+        _state = State.INITIAL;
 	    if (_s == null)
 	        return;
 	    try {
@@ -303,8 +308,6 @@ public class ClientMain extends Service {
             Log.e(TAG, "IO Exception on close", e);
         }
 	    _s = null;
-	    _state = State.INITIAL;
-
 	}
 
 	// returns index of \n or -1
@@ -407,16 +410,15 @@ public class ClientMain extends Service {
                 break; // ugh
 */
 	        }
+            Log.w(TAG, "READ: " + huge);
+
 	        return huge.toString().split("\n");
         } catch (IOException e) {
             Log.e(TAG, "readline ioexception", e);
         } catch (Exception e) {
             Log.e(TAG, "Other exception", e);
         }
-	    
-	    String[] temp2 = { "" };
-	    return temp2;
-	    
+	    return _emptypost;
 	}
 
 	private String[] writeline(String msg) { return writeline(msg, null); }
@@ -427,10 +429,16 @@ public class ClientMain extends Service {
             outs = _s.getOutputStream();
             byte[] send = msg.getBytes("UTF-8");
             outs.write(send);
+            Log.w(TAG, "SENT: " + msg);
         } catch (UnsupportedEncodingException e) {
             Log.e(TAG, "UTF-8 doesn't work, this is weird", e);
         } catch (IOException e) {
             Log.e(TAG, "IO Exception", e);
+            _s = null;
+            // I need convenience functions for switching to a given state
+            _state = State.INITIAL;
+            _currentlist = _forumlist;
+            return _emptypost;
         } catch (Exception e) {
             Log.e(TAG, "Other error", e);
         }
