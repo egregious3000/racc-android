@@ -1,6 +1,6 @@
 package net.example.raccoonclient;
 
-import java.util.ArrayList;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -9,15 +9,14 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.StrictMode;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -36,6 +35,7 @@ public class RaccClientActivity extends Activity {
             onResume();
             }
         public void onServiceDisconnected(ComponentName className) {
+            Log.e(TAG, "onservice disconnected");
             _main = null;
         }
     };
@@ -59,13 +59,20 @@ public class RaccClientActivity extends Activity {
     private Handler _h = new Handler();
     MainUILoop _looper = new MainUILoop();
     boolean _killed = false;
-
+    ArrayBlockingQueue<String> _posts = new ArrayBlockingQueue<String>(10);
+    
     private class MainUILoop implements Runnable {
         @Override
         public void run() {
             if (_killed)
                 return;
-            // Does nothing for now 
+            String _s;
+            // make a post if it's in our queue; I hope it's the right forum!
+            if (_main != null) {
+                if ((_s = _posts.poll()) != null) {
+                    _main.post(_s);
+                }
+            }
             _h.postDelayed(this, 1000);
         }
     }
@@ -93,7 +100,6 @@ public class RaccClientActivity extends Activity {
                 assert(_main != null);
                 Intent i2 = new Intent(RaccClientActivity.this, WritePost.class);
                 i2.putExtra("forumname", _main._forumname);
-                
                 startActivityForResult(i2, 129);
                 break;
             case R.id.login:
@@ -145,10 +151,18 @@ public class RaccClientActivity extends Activity {
         }
         if (requestCode == 129) {
             if (resultCode == Activity.RESULT_OK) {
-                assert(_main != null);
-                Bundle b = data.getExtras();
-                String thepost = b.getString("thepost");
-                _main.post(thepost);
+                try { 
+                    assert(_main != null);
+                    Bundle b = data.getExtras();
+                    String thepost = b.getString("thepost");
+                    Log.e(TAG, "the post is " + ( (thepost == null) ? "NULL" : thepost));
+                    Log.e(TAG, "the main is " + ( (_main == null) ? "NULL" : "not null"));
+                    _posts.add(thepost);
+//                    _main.post("dead code");
+                    Log.e(TAG, "sample");
+                } catch (Exception e) {
+                    Log.e(TAG, "exception receiving ", e);
+                }
             }
         }
 	}
@@ -156,9 +170,13 @@ public class RaccClientActivity extends Activity {
     // Start lifecycle code
 	@Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+
+	    // this lets us do network IO from the UI thread.  This is not a good overall design.
+        StrictMode.enableDefaults();
+
+	    super.onCreate(savedInstanceState);
         try {
-            doBindService(); // connect to _main
+            doBindService();
             Log.e(TAG, "starting");
             setContentView(R.layout.main);
             _usernametextfield = (TextView) findViewById(R.id.username);
@@ -184,7 +202,7 @@ public class RaccClientActivity extends Activity {
 	@SuppressWarnings("unchecked")
     public void onResume() {
 	    super.onResume();
-	    Log.e(TAG, "Resuming");
+	    Log.w(TAG, "Resuming");
 	    try { 
     	    if (_main != null) {
     	        switch (_main._state) {
@@ -217,28 +235,23 @@ public class RaccClientActivity extends Activity {
 ///    	        _list = new ForumListAdapter(this, R.layout.item, (ArrayList<Forum>) _main._forumlist.clone());
                 _message.setText(TextUtils.join("\n", _main._post));
                 _list = _main.new ThingyListAdapter(this, R.layout.item, _main._currentlist);
-    	        Log.e(TAG, "remade forum list adapater");
-    	        Log.e(TAG, "list size is " + _main._forumlist.size());
-    	        Log.e(TAG, "username is " + _main._username);
     	        _usernametextfield.setText(_main._username);
     	        _list.notifyDataSetChanged();
             } else {
-                Log.e(TAG, "main is null");
+                Log.e(TAG, "main is null in onResume()");
             }
     	    ListView lv = (ListView)findViewById(R.id.forumlist);
     	    lv.setTextFilterEnabled(true);
     	    lv.setAdapter(_list);
             lv.setOnItemClickListener(new OnItemClickListener() {
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Log.e(TAG, "position is " + position + ", id is " + id);
+  //                  Log.e(TAG, "position is " + position + ", id is " + id);
                     ClientMain.Thingy t = _list.getItem(position);
-                    Log.e(TAG, "checking if " + _main._state + " equals " + ClientMain.State.FORUM_LIST);
+//                    Log.e(TAG, "checking if " + _main._state + " equals " + ClientMain.State.FORUM_LIST);
                     if (_main._state == ClientMain.State.FORUM_LIST) {
-                        Log.e(TAG, "xxx");
                         _main.changeToForum(t.getNumber());
                         onResume();
                     } else if (_main._state == ClientMain.State.MESSAGE_LIST) {
-                        Log.e(TAG, "xxx");
                         _main.getMessage(t.getNumber());
                         onResume();
                     }
@@ -262,10 +275,11 @@ public class RaccClientActivity extends Activity {
 	    case INITIAL:
 	    case LOGGING_IN:
 	        super.onBackPressed();
-	        break;
+	        return;
         case FORUM_LIST:
             _main.logout();
-            break;
+            onResume();
+            return;
 	    }
 	    _main.back();
 	    onResume();
@@ -273,6 +287,7 @@ public class RaccClientActivity extends Activity {
 
 	
 	public void onDestroy() {
+	    Log.e(TAG, "destroying!");
 	    _killed = true;
 	    doUnbindService();
 	    super.onDestroy();
