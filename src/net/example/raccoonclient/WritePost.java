@@ -2,6 +2,7 @@ package net.example.raccoonclient;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -33,10 +34,14 @@ public class WritePost extends Activity {
         _post.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent resultIntent = new Intent();
-                        resultIntent.putExtra("thepost", _thepost.getText().toString());
-                        setResult(Activity.RESULT_OK, resultIntent);
-                        finish();
+                        try {
+                            Intent resultIntent = new Intent();
+                            resultIntent.putExtra("thepost", _thepost.getText().toString());
+                            setResult(Activity.RESULT_OK, resultIntent);
+                            finish();
+                        } catch (Exception e) {
+                            Log.e(TAG, "exception sending:", e);
+                        }
                     }
                 });
     }
