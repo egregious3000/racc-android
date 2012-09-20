@@ -15,5 +15,8 @@
   	<string name="done">Done!</string>
   	<string name="back">Back</string>
   	<string name="post">Post</string>
+  	<string name="unread">Unread</string>
+  	<string name="joined">Joined</string>
+  	<string name="all">All</string>
 </resources>
 
