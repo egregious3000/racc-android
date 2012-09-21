@@ -10,7 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.StrictMode;
-import android.text.TextUtils;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -192,6 +192,7 @@ public class RaccClientActivity extends Activity {
             _post.setOnClickListener(_buttonhandler);
             _logout.setEnabled(false);
             _message = (TextView) findViewById(R.id.message);
+            _message.setMovementMethod(new ScrollingMovementMethod());
             //            _list = new ForumListAdapter(this, R.layout.item, new ArrayList<Forum>());
             _h.post(_looper);
         } catch (Exception e) {
@@ -233,7 +234,7 @@ public class RaccClientActivity extends Activity {
                     break;
     	        }
 ///    	        _list = new ForumListAdapter(this, R.layout.item, (ArrayList<Forum>) _main._forumlist.clone());
-                _message.setText(TextUtils.join("\n", _main._post));
+                _message.setText(_main._formattedpost);
                 _list = _main.new ThingyListAdapter(this, R.layout.item, _main._currentlist);
     	        _usernametextfield.setText(_main._username);
     	        _list.notifyDataSetChanged();

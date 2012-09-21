@@ -15,23 +15,26 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.DataSetObserver;
+import android.graphics.Typeface;
 import android.os.Binder;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.SpannedString;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 
 public class ClientMain extends Service {
     
     abstract public class Thingy {
-        abstract public String getHeader();
+        abstract public SpannableString getHeader();
         abstract public int getNumber();
     }
  
@@ -62,19 +65,82 @@ public class ClientMain extends Service {
             }
         }
         public int getNumber() { return _number; }
-        public String getHeader() {
+        public SpannableString getHeader() {
             if (_todo == 0)
-                return _name;
-            else
-                return (_name + " (" + _todo + ")"); 
+                return new SpannableString(_name);
+            SpannableString ss = new SpannableString(_name + " (" + _todo + ")");
+            ss.setSpan(new ForegroundColorSpan(0xFF00FF00), _name.length(), ss.length(), 0);   
+            return ss;
         }
     }
 
+    // Find username, or user # if no name
+    private String getUserName(String s) {
+        String authordata[] = s.split("/");
+        assert (authordata.length == 3);
+        if (authordata[1].equals("(Unknown ISCABBS User)"))
+            return authordata[0];
+        return authordata[1];
+    }
+
+    SpannableStringBuilder formatMessage(String[] lines) {
+        SpannableStringBuilder ssb = new SpannableStringBuilder();
+        boolean inheader = true;
+        String author = "";
+        String date = "";
+        String to = "";
+        
+        for (String line : lines) {
+            if (inheader) {
+                if (line.length() == 0) {
+                    inheader = false;
+                    if (author.length() == 0) {
+                        ssb.append(" -anonymous- ");
+                        ssb.setSpan(new ForegroundColorSpan(0xFFFFFF00), 1, 12, 0);
+                        ssb.setSpan(new StyleSpan(Typeface.BOLD), 0, ssb.length(), 0);
+                    } else {
+                        ssb.append(date);
+                        ssb.setSpan(new ForegroundColorSpan(0xFFFF00FF), 0, date.length(), 0);
+                        ssb.append(" from ");
+                        ssb.append(author);
+                        ssb.setSpan(new ForegroundColorSpan(0xFF00FFFF), date.length() + 6, date.length() + author.length() + 6, 0);
+                        if (to.length() != 0) {
+                            ssb.append(" to ");
+                            int len = ssb.length();
+                            ssb.append(to);
+                            ssb.setSpan(new ForegroundColorSpan(0xFF00FFFF), len, len + to.length(), 0);
+                        }
+                    }
+                    ssb.setSpan(new StyleSpan(Typeface.BOLD), 0, ssb.length(), 0);
+                    ssb.append("\n\n");
+                    continue;
+                }
+                if (line.startsWith("Formal-Name")) {
+                    author = getUserName(line.substring(13));
+                } else if (line.startsWith("Date")) {
+                    // Date: Thu, 06 Nov 2008 21:13:00 GMT
+                    date = line.substring(11,27) + line.substring(30);
+                } else if (line.startsWith("Formal-To")) {
+                    to = getUserName(line.substring(11));
+                }
+                continue;
+            }
+            if (! line.equals(".")) {
+                ssb.append(line);
+                ssb.append("\n");
+            }   
+        }   
+        return ssb;
+    }
+
+    
     public class Message extends Thingy {
 
         int _number;
         String _subject = "y";
+        String _author = "";
         
+        // I wish I wish this were static
         // noteno:201642   subject:Fucking hackers! If I could ever find you, I would see that     size:115
 
         // noteno:78049    formal-author:acct550746-oldisca/Danix/(hidden) date:Tue, 18 Sep 2012 00:42:00 GMT      subject:Feoh> heh, yes you have to back up your zone files. I had       size:192
@@ -82,16 +148,23 @@ public class ClientMain extends Service {
         Message(String s) {
             String[] fields = s.split("\t");
             for (String f : fields) {
-                String[] k = f.split(":");
-                if (k[0].equals("noteno"))
-                    _number = Integer.parseInt(k[1]);
-                if (k[0].equals("subject"))
-                    _subject = k[1];
+                if (f.startsWith("noteno"))
+                    _number = Integer.parseInt(f.substring(7));
+                if (f.startsWith("subject"))
+                    _subject = f.substring(8);
+                if (f.startsWith("formal-author")) {
+                    _author = getUserName(f.substring(14));
+                }
             }
         }
-
         public int getNumber() { return _number; }
-        public String getHeader() { return _subject; }
+        public SpannableString getHeader() { 
+            if (_author.length() == 0)
+                return new SpannableString(_subject);
+            SpannableString ss = new SpannableString(_subject + " (" + _author + ")");
+            ss.setSpan(new ForegroundColorSpan(0xFF00FFFF), _subject.length(), ss.length(), 0);   
+            return ss;
+        }
     }
 
 //    _list = new ArrayAdapter(this, R.layout.item, _main._currentlist);
@@ -136,6 +209,7 @@ public class ClientMain extends Service {
     MessageList _messagelist = new MessageList();
     ThingyList _currentlist = _forumlist;
     String[] _post = { };
+    SpannableStringBuilder _formattedpost = null;
     MessageList _emptylist = new MessageList();
     String[] _emptypost = { };
 
@@ -163,6 +237,7 @@ public class ClientMain extends Service {
         if (_state == State.SHOW_POST) {
             _state = State.MESSAGE_LIST;
             _post = _emptypost;
+            _formattedpost = null;
             _currentlist = _messagelist;
             return true;
         }
@@ -179,6 +254,7 @@ public class ClientMain extends Service {
         _state = State.SHOW_POST;
         String[] lines = writeline("READ " + i + "\n");
         _post = lines;
+        _formattedpost = formatMessage(lines);
         _currentlist = _emptylist;
         return true;
     }

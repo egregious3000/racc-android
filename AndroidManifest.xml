@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.example.raccoonclient"
-    android:versionCode="13"
-    android:versionName="0.74" >
+    android:versionCode="14"
+    android:versionName="0.79" >
     <uses-permission android:name="android.permission.INTERNET" />
     
     <uses-sdk android:minSdkVersion="8"
