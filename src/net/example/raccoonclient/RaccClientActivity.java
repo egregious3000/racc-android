@@ -12,6 +12,7 @@ import android.os.IBinder;
 import android.os.StrictMode;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -59,18 +60,23 @@ public class RaccClientActivity extends Activity {
     private Handler _h = new Handler();
     MainUILoop _looper = new MainUILoop();
     boolean _killed = false;
-    ArrayBlockingQueue<String> _posts = new ArrayBlockingQueue<String>(10);
+    private class Post {
+        String post;
+        Integer mode;
+        Post(String p, Integer m) { post = p; mode = m; } 
+    }
+    ArrayBlockingQueue<Post> _posts = new ArrayBlockingQueue<Post>(10);
     
     private class MainUILoop implements Runnable {
         @Override
         public void run() {
             if (_killed)
                 return;
-            String _s;
+            Post post;
             // make a post if it's in our queue; I hope it's the right forum!
             if (_main != null) {
-                if ((_s = _posts.poll()) != null) {
-                    _main.post(_s);
+                if ((post = _posts.poll()) != null) {
+                    _main.post(post.post, post.mode);
                 }
             }
             _h.postDelayed(this, 1000);
@@ -85,8 +91,8 @@ public class RaccClientActivity extends Activity {
     ClientMain.ThingyListAdapter _list;
     String _username, _password;
     
-	private ButtonHandler _buttonhandler = new ButtonHandler();
-	private class ButtonHandler implements OnClickListener {
+    private ButtonHandler _buttonhandler = new ButtonHandler();
+    private class ButtonHandler implements OnClickListener {
 	    public void onClick(View src) {
 	        switch (src.getId()) {
             case R.id.change:
@@ -155,10 +161,13 @@ public class RaccClientActivity extends Activity {
                     assert(_main != null);
                     Bundle b = data.getExtras();
                     String thepost = b.getString("thepost");
-                    Log.e(TAG, "the post is " + ( (thepost == null) ? "NULL" : thepost));
-                    Log.e(TAG, "the main is " + ( (_main == null) ? "NULL" : "not null"));
-                    _posts.add(thepost);
-//                    _main.post("dead code");
+                    Integer id = b.getInt("anon");
+                    Post post = new Post(thepost, id);
+//                    Pair<String,Integer> post = new Pair<String,Integer>(thepost, id);
+                    
+                    //                    Log.e(TAG, "the post is " + ( (thepost == null) ? "NULL" : thepost));
+//                    Log.e(TAG, "the main is " + ( (_main == null) ? "NULL" : "not null"));
+                    _posts.add(post);
                     Log.e(TAG, "sample");
                 } catch (Exception e) {
                     Log.e(TAG, "exception receiving ", e);

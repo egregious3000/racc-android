@@ -25,6 +25,7 @@ import android.text.SpannedString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -214,7 +215,7 @@ public class ClientMain extends Service {
     String[] _emptypost = { };
 
     
-    public boolean post(String s) {
+    public boolean post(String s, Integer mode) {
         Log.d(TAG, "posting something");
         Log.v(TAG, "posting " + s);
         String[] lines = writeline("OKAY POST\n", 1);
@@ -225,7 +226,8 @@ public class ClientMain extends Service {
         if (lines[0].charAt(0) != '2') {
             Log.e(TAG, "PROTOCOL ERROR.  We are mis-aligned. " +  lines[0]);
         }
-        writeline("POST\n", 1);
+        String flags = (mode == R.id.postanonymous) ? " flags:anonymous" : "";
+        writeline("POST" + flags + "\n", 1);
         String[] test = writeline(s + "\n.\n");
         for (String t : test) 
             Log.e(TAG, "post returned " + t);

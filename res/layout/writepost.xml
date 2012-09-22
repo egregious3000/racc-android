@@ -5,25 +5,39 @@
          android:layout_height="match_parent"
          android:paddingLeft="8dp"
          android:paddingRight="8dp">
-
-     <TextView 
+    
+   <TextView 
          android:id="@+id/header"
-android:layout_width="wrap_content"
-android:layout_height="wrap_content"
-android:paddingLeft="2dip"
-android:paddingRight="4dip"
-android:text="Helper Text Goes Here"
-/>
-<EditText android:id="@+id/postText"
-android:layout_width="fill_parent"
-android:layout_height="wrap_content"
-android:cursorVisible="true"
-android:editable="true"
-android:lines="8"
-/>
-<Button android:id="@+id/post"
-android:layout_width="fill_parent"
-android:layout_height="wrap_content"
-android:text="@string/post"
-/>
+		 android:layout_width="wrap_content"
+		 android:layout_height="wrap_content"
+         android:paddingLeft="2dip"
+         android:paddingRight="4dip" />
+
+   <EditText android:id="@+id/postText"
+         android:hint="@string/hint_post"
+	     android:layout_width="fill_parent"
+	     android:layout_height="wrap_content"
+         android:cursorVisible="true"
+		 android:lines="8" />
+   <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+         android:orientation="horizontal"
+         android:layout_width="fill_parent"
+         android:layout_height="wrap_content"
+         android:paddingLeft="8dp"
+         android:paddingRight="8dp">
+       
+   <Button android:id="@+id/post"
+		 android:layout_width="0px"
+	     android:layout_weight="0.5"
+		 android:layout_height="wrap_content"
+		 android:text="@string/post" />
+       
+   <Button android:id="@+id/postanonymous"
+		 android:layout_width="0px"
+	     android:layout_weight="0.5"
+		 android:layout_height="wrap_content"
+		 android:text="@string/postanonymous" />
+   
+   </LinearLayout>
+   
 </LinearLayout>
