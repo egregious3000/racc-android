@@ -272,11 +272,9 @@ public class RaccClientActivity extends Activity {
                         onResume();
                     } else if (_main._state == ClientMain.State.MESSAGE_LIST) {
                         _main.getMessage(t.getNumber());
+                        _message.scrollTo(0, 0);
                         onResume();
                     }
-                    //                    Intent i = new Intent(RaccClientActivity.this, ForumActivity.class);
-//                    i.putExtra("forumnumber", f._number);
-//                    startActivity(i);       
                 }
               });
 
