@@ -13,6 +13,7 @@ import android.os.StrictMode;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.util.Pair;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -85,6 +86,7 @@ public class RaccClientActivity extends Activity {
     // End UI Loop Code
 
     TextView _usernametextfield, _message;
+    int _messagesize = 14;
     Button _userpass, _login, _logout, _back, _post;
 //    ForumListAdapter _list;
 //    ArrayAdapter<ClientMain.Thingy> _list;
@@ -163,10 +165,6 @@ public class RaccClientActivity extends Activity {
                     String thepost = b.getString("thepost");
                     Integer id = b.getInt("anon");
                     Post post = new Post(thepost, id);
-//                    Pair<String,Integer> post = new Pair<String,Integer>(thepost, id);
-                    
-                    //                    Log.e(TAG, "the post is " + ( (thepost == null) ? "NULL" : thepost));
-//                    Log.e(TAG, "the main is " + ( (_main == null) ? "NULL" : "not null"));
                     _posts.add(post);
                     Log.e(TAG, "sample");
                 } catch (Exception e) {
@@ -178,11 +176,21 @@ public class RaccClientActivity extends Activity {
 	
     // Start lifecycle code
 	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+	  super.onSaveInstanceState(savedInstanceState);
+      savedInstanceState.putInt("messagesize",  _messagesize);
+	}
+	
+	@Override
+	public void onRestoreInstanceState(Bundle savedInstanceState) {
+	  super.onRestoreInstanceState(savedInstanceState);
+	  _messagesize = savedInstanceState.getInt("messagesize");
+	}
+	
+	@Override
     public void onCreate(Bundle savedInstanceState) {
-
 	    // this lets us do network IO from the UI thread.  This is not a good overall design.
-        StrictMode.enableDefaults();
-
+//      StrictMode.enableDefaults();
 	    super.onCreate(savedInstanceState);
         try {
             doBindService();
@@ -212,6 +220,7 @@ public class RaccClientActivity extends Activity {
 	@SuppressWarnings("unchecked")
     public void onResume() {
 	    super.onResume();
+	    _message.setTextSize(_messagesize);
 	    Log.w(TAG, "Resuming");
 	    try { 
     	    if (_main != null) {
@@ -273,6 +282,20 @@ public class RaccClientActivity extends Activity {
 
 	    } catch (Exception e) {
 	        Log.e(TAG, "resuming exception", e);
+	    }
+	}
+	
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+	    if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) { 
+            _messagesize--;
+            onResume();
+            return true;
+	    } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+	        _messagesize++;
+            onResume();
+            return true;
+	    } else {
+	        return super.onKeyDown(keyCode, event); 
 	    }
 	}
 	
