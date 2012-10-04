@@ -34,12 +34,12 @@ import android.widget.TextView;
 
 public class ClientMain extends Service {
     
-    abstract public class Thingy {
+    abstract public class Listable {
         abstract public SpannableString getHeader();
         abstract public int getNumber();
     }
  
-    public class Forum extends Thingy {
+    public class Forum extends Listable {
 
         int _number;
         String _name = "x";
@@ -74,8 +74,40 @@ public class ClientMain extends Service {
             return ss;
         }
     }
+    
+    public class Message extends Listable {
 
-    // Find username, or user # if no name
+        int _number;
+        String _subject = "y";
+        String _author = "";
+        
+        // noteno:201642   subject:Fucking hackers! If I could ever find you, I would see that     size:115
+        // noteno:78049    formal-author:acct550746-oldisca/Danix/(hidden) date:Tue, 18 Sep 2012 00:42:00 GMT      subject:Feoh> heh, yes you have to back up your zone files. I had       size:192
+
+        Message(String s) {
+            String[] fields = s.split("\t");
+            for (String f : fields) {
+                if (f.startsWith("noteno"))
+                    _number = Integer.parseInt(f.substring(7));
+                if (f.startsWith("subject"))
+                    _subject = f.substring(8);
+                if (f.startsWith("formal-author")) {
+                    _author = getUserName(f.substring(14));
+                }
+            }
+        }
+        public int getNumber() { return _number; }
+        public SpannableString getHeader() { 
+            if (_author.length() == 0)
+                return new SpannableString(_subject);
+            SpannableString ss = new SpannableString("(" + _author + ") " + _subject);
+            ss.setSpan(new ForegroundColorSpan(0xFF00FFFF), 0, _author.length() + 2, 0);   
+            return ss;
+        }
+    }
+
+    // Find username, or user # if no name.
+    // Todo: use database of old users for expired users.
     private String getUserName(String s) {
         String authordata[] = s.split("/");
         assert (authordata.length == 3);
@@ -134,54 +166,20 @@ public class ClientMain extends Service {
         return ssb;
     }
 
+
     
-    public class Message extends Thingy {
-
-        int _number;
-        String _subject = "y";
-        String _author = "";
-        
-        // I wish I wish this were static
-        // noteno:201642   subject:Fucking hackers! If I could ever find you, I would see that     size:115
-
-        // noteno:78049    formal-author:acct550746-oldisca/Danix/(hidden) date:Tue, 18 Sep 2012 00:42:00 GMT      subject:Feoh> heh, yes you have to back up your zone files. I had       size:192
-
-        Message(String s) {
-            String[] fields = s.split("\t");
-            for (String f : fields) {
-                if (f.startsWith("noteno"))
-                    _number = Integer.parseInt(f.substring(7));
-                if (f.startsWith("subject"))
-                    _subject = f.substring(8);
-                if (f.startsWith("formal-author")) {
-                    _author = getUserName(f.substring(14));
-                }
-            }
-        }
-        public int getNumber() { return _number; }
-        public SpannableString getHeader() { 
-            if (_author.length() == 0)
-                return new SpannableString(_subject);
-            SpannableString ss = new SpannableString(_subject + " (" + _author + ")");
-            ss.setSpan(new ForegroundColorSpan(0xFF00FFFF), _subject.length(), ss.length(), 0);   
-            return ss;
-        }
-    }
-
-//    _list = new ArrayAdapter(this, R.layout.item, _main._currentlist);
-    abstract class ThingyList extends ArrayList<Thingy> {};
-    class ForumList extends ThingyList { };
-    class MessageList extends ThingyList { };
+    abstract class ListableList extends ArrayList<Listable> {};
+    class ForumList extends ListableList { };
+    class MessageList extends ListableList { };
     
-    //     public ForumListAdapter(Context context, int resource, ArrayList<Forum> objects) {    
-
-    public class ThingyListAdapter extends ArrayAdapter<Thingy> {
-        ThingyListAdapter(Context c, int resource, ArrayList<Thingy> objects) {
+    public class ThingyListAdapter extends ArrayAdapter<Listable> {
+        @SuppressWarnings("unchecked")
+        ThingyListAdapter(Context c, int resource, ArrayList<Listable> objects) {
             super(c, resource, objects);
             _context = c;
-            _things = (ArrayList<Thingy>) objects.clone();
+            _things = (ArrayList<Listable>) objects.clone();
         }
-        private ArrayList<Thingy> _things;
+        private ArrayList<Listable> _things;
         private Context _context;
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
@@ -192,7 +190,7 @@ public class ClientMain extends Service {
                 v = vi.inflate(R.layout.item, null);
             }
             try {
-                Thingy t = _things.get(position);
+                Listable t = _things.get(position);
                 TextView tv = (TextView) v;
                 tv.setText(t.getHeader());
             } catch (Exception e) {
@@ -201,20 +199,15 @@ public class ClientMain extends Service {
             return v;
         }
     }
-
-//    public class ForumListAdapter extends ThingyListAdapter { }
- //   public class MessageListAdapter extends ThingyListAdapter { }
-    
     
     ForumList _forumlist = new ForumList();
     MessageList _messagelist = new MessageList();
-    ThingyList _currentlist = _forumlist;
+    ListableList _currentlist = _forumlist;
     String[] _post = { };
     SpannableStringBuilder _formattedpost = null;
     MessageList _emptylist = new MessageList();
     String[] _emptypost = { };
 
-    
     public boolean post(String s, Integer mode) {
         Log.d(TAG, "posting something");
         Log.v(TAG, "posting " + s);
@@ -352,7 +345,6 @@ public class ClientMain extends Service {
 	        Log.e(TAG, "trying to load forums when socket is null");
 	        return false;
 	    }
-	    // XXX send "LOGIN Username    Password\n" here
 	    String mode = "";
 	    switch (_forummode) {
         case R.id.radio_unread:    mode = "TODO"; break;    
@@ -424,7 +416,6 @@ public class ClientMain extends Service {
 	    }
 	}
 
-	
 	// If return starts with "3", returns multiple Strings.
 	// Otherwise returns 1 String.
 	// Each String is a line.
@@ -465,31 +456,14 @@ public class ClientMain extends Service {
 	                    // xxx not if multiline mode
 	            }
 	            /*
-	            Log.w(TAG, "read in " + readlen + " thingies.");
-	            if (readlen == -1) {
-	                if (state == 1)
-	                    break;
-	                Thread.sleep(100);
-	                continue;
-	            }
-	            Log.w(TAG, "XXX:" + new String(buffer, 0, readlen, "UTF-8") + ":XXX");
-	            // break into lines
                 bufferIntoLines(ret, buffer, readlen);
-
-                Log.e(TAG, "ALPHA length is " + ret.size());
-                for (StringBuilder sb : ret) {
-                    Log.e(TAG, "ALPHA line: " + sb.toString());
-                }
-
                 if (state == 0) {
                     Log.e(TAG, "length of ret is " + ret.size());
                     state = (ret.get(0).charAt(0) == '3') ? 2 : 1;
                 }
                 break; // ugh
-*/
+	             */
 	        }
-            Log.w(TAG, "READ: " + huge);
-
 	        return huge.toString().split("\n");
         } catch (IOException e) {
             Log.e(TAG, "readline ioexception", e);

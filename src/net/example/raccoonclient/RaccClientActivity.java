@@ -265,7 +265,7 @@ public class RaccClientActivity extends Activity {
             lv.setOnItemClickListener(new OnItemClickListener() {
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
   //                  Log.e(TAG, "position is " + position + ", id is " + id);
-                    ClientMain.Thingy t = _list.getItem(position);
+                    ClientMain.Listable t = _list.getItem(position);
 //                    Log.e(TAG, "checking if " + _main._state + " equals " + ClientMain.State.FORUM_LIST);
                     if (_main._state == ClientMain.State.FORUM_LIST) {
                         _main.changeToForum(t.getNumber());
