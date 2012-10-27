@@ -106,7 +106,14 @@ public class RaccClientActivity extends Activity {
 
         @Override
         protected Boolean doInBackground(String... params) {
-            return _main.login();
+            if (params[0].equals("login")) {
+                return _main.login();
+            }
+            if (params[0].equals("logout")) {
+                _main.logout();
+                return false;
+            }
+            return false;
         }
     };
     private Dialer _dialer;
@@ -131,23 +138,21 @@ public class RaccClientActivity extends Activity {
             case R.id.login:
                 if (_main == null) {
                     Log.e(TAG, "main is null :<");
-                } else if (_dialer == null) {
-                    Log.e(TAG, "_dialer is null :<");
                 } else {
-                    try {
-                        _dialer.execute();
-                    } catch (Exception e) {
-                        Log.e(TAG, "EXCEPTION ", e);
-                    }
+                    _dialer = new Dialer();
+                    _dialer.execute("login");
                 }   
                 break;
             case R.id.logout:
                 if (_main == null) {
                     Log.e(TAG, "main is null :<");
                 } else {
-                    _main.logout();
-                    _login.setEnabled(true);
-                    _logout.setEnabled(false);
+                    try {
+                        _dialer = new Dialer();
+                        _dialer.execute("logout");
+                    } catch (Exception e) {
+                        Log.e(TAG, "LOGOUT EXCEPTION", e);
+                    }
                 }
                 break;
             case R.id.back:
@@ -213,7 +218,6 @@ public class RaccClientActivity extends Activity {
         StrictMode.enableDefaults();
 	    super.onCreate(savedInstanceState);
         try {
-            _dialer = new Dialer();
             doBindService();
             Log.e(TAG, "starting");
             setContentView(R.layout.main);
