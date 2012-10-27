@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -93,6 +94,23 @@ public class RaccClientActivity extends Activity {
     ClientMain.ThingyListAdapter _list;
     String _username, _password;
     
+    private class Dialer extends AsyncTask<String, String, Boolean> {
+        @Override
+        protected void onPostExecute(Boolean status)
+        {
+            super.onPostExecute(status);
+            _login.setEnabled(!status);
+            _logout.setEnabled(status);
+            onResume();
+        }
+
+        @Override
+        protected Boolean doInBackground(String... params) {
+            return _main.login();
+        }
+    };
+    private Dialer _dialer;
+
     private ButtonHandler _buttonhandler = new ButtonHandler();
     private class ButtonHandler implements OnClickListener {
 	    public void onClick(View src) {
@@ -113,11 +131,13 @@ public class RaccClientActivity extends Activity {
             case R.id.login:
                 if (_main == null) {
                     Log.e(TAG, "main is null :<");
+                } else if (_dialer == null) {
+                    Log.e(TAG, "_dialer is null :<");
                 } else {
-                    if (_main.login()) {
-                        _login.setEnabled(false);
-                        _logout.setEnabled(true);   
-                        onResume();
+                    try {
+                        _dialer.execute();
+                    } catch (Exception e) {
+                        Log.e(TAG, "EXCEPTION ", e);
                     }
                 }   
                 break;
@@ -190,9 +210,10 @@ public class RaccClientActivity extends Activity {
 	@Override
     public void onCreate(Bundle savedInstanceState) {
 	    // this lets us do network IO from the UI thread.  This is not a good overall design.
-//      StrictMode.enableDefaults();
+        StrictMode.enableDefaults();
 	    super.onCreate(savedInstanceState);
         try {
+            _dialer = new Dialer();
             doBindService();
             Log.e(TAG, "starting");
             setContentView(R.layout.main);
