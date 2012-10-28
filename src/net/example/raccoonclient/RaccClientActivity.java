@@ -93,7 +93,8 @@ public class RaccClientActivity extends Activity {
 //    ArrayAdapter<ClientMain.Thingy> _list;
     ClientMain.ThingyListAdapter _list;
     String _username, _password;
-    
+
+    // for logging in and out
     private class Dialer extends AsyncTask<String, String, Boolean> {
         @Override
         protected void onPostExecute(Boolean status)
@@ -116,6 +117,40 @@ public class RaccClientActivity extends Activity {
             return false;
         }
     };
+
+    // for retrieving forums and messages
+    private class Reader extends AsyncTask<Integer, String, Void> {
+        String _mode;
+        public Reader(String string) {
+            _mode = string;
+        }
+
+        @Override
+        protected void onPostExecute(Void _)
+        {
+            super.onPostExecute(_);
+            if (_mode.equals("message")) {
+                _message.scrollTo(0, 0);
+                Log.e(TAG, "SCROLLED");
+            }
+            onResume();
+        }
+
+        @Override
+        protected Void doInBackground(Integer... numbers) {
+            if (_mode.equals("message")) {
+                _main.getMessage(numbers[0]);
+                return null;
+            }
+            if (_mode.equals("forum")) {
+                _main.changeToForum(numbers[0]);
+                return null;
+            }
+            return null;
+        }
+    };
+
+    
     private Dialer _dialer;
 
     private ButtonHandler _buttonhandler = new ButtonHandler();
@@ -293,12 +328,9 @@ public class RaccClientActivity extends Activity {
                     ClientMain.Listable t = _list.getItem(position);
 //                    Log.e(TAG, "checking if " + _main._state + " equals " + ClientMain.State.FORUM_LIST);
                     if (_main._state == ClientMain.State.FORUM_LIST) {
-                        _main.changeToForum(t.getNumber());
-                        onResume();
+                        new Reader("forum").execute(t.getNumber());
                     } else if (_main._state == ClientMain.State.MESSAGE_LIST) {
-                        _main.getMessage(t.getNumber());
-                        _message.scrollTo(0, 0);
-                        onResume();
+                        new Reader("message").execute(t.getNumber());
                     }
                 }
               });
@@ -333,8 +365,8 @@ public class RaccClientActivity extends Activity {
 	        super.onBackPressed();
 	        return;
         case FORUM_LIST:
-            _main.logout();
-            onResume();
+            _dialer = new Dialer();
+            _dialer.execute("logout");
             return;
 	    }
 	    _main.back();
