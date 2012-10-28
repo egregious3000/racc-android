@@ -3,6 +3,10 @@ racc-android
 
 Android version of raccdoc client.  Suitable for beta testing.
 
+LATEST VERSION:
+
+Hopefully take care of exceptions on crashing on logging in.
+
 ISSUES:
 
 The messages you read here are not marked as read on the BBS.
