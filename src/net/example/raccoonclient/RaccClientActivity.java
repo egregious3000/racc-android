@@ -88,7 +88,7 @@ public class RaccClientActivity extends Activity {
 
     TextView _usernametextfield, _message;
     int _messagesize = 14;
-    Button _userpass, _login, _logout, _back, _post;
+    Button _userpass, _login, _logout, _back, _post, _next;
 //    ForumListAdapter _list;
 //    ArrayAdapter<ClientMain.Thingy> _list;
     ClientMain.ThingyListAdapter _list;
@@ -129,10 +129,10 @@ public class RaccClientActivity extends Activity {
         protected void onPostExecute(Void _)
         {
             super.onPostExecute(_);
-            if (_mode.equals("message")) {
-                _message.scrollTo(0, 0);
-                Log.e(TAG, "SCROLLED");
-            }
+//            if (_mode.equals("message")) {
+            _message.scrollTo(0, 0);
+  //              Log.e(TAG, "SCROLLED");
+  //          }
             onResume();
         }
 
@@ -146,6 +146,10 @@ public class RaccClientActivity extends Activity {
                 _main.changeToForum(numbers[0]);
                 return null;
             }
+            if (_mode.equals("next")) {
+                _main.getNextMessage();
+                return null;
+            }
             return null;
         }
     };
@@ -156,6 +160,7 @@ public class RaccClientActivity extends Activity {
     private ButtonHandler _buttonhandler = new ButtonHandler();
     private class ButtonHandler implements OnClickListener {
 	    public void onClick(View src) {
+	        Log.e(TAG, "view is " + src.getId());
 	        switch (src.getId()) {
             case R.id.change:
                 assert(_main != null);
@@ -194,6 +199,11 @@ public class RaccClientActivity extends Activity {
                 _main.back();
                 onResume();
                 break;
+            case R.id.next:
+                new Reader("next").execute();
+                break;
+            default:
+                Log.e(TAG, "DEFAULT NOT FOUND");
 	        }
 	    }   
 	}
@@ -262,11 +272,13 @@ public class RaccClientActivity extends Activity {
             _logout = (Button) findViewById(R.id.logout);
             _back = (Button) findViewById(R.id.back);
             _post = (Button) findViewById(R.id.post);
+            _next = (Button) findViewById(R.id.next);
             _userpass.setOnClickListener(_buttonhandler);
             _login.setOnClickListener(_buttonhandler);
             _logout.setOnClickListener(_buttonhandler);
             _back.setOnClickListener(_buttonhandler);
             _post.setOnClickListener(_buttonhandler);
+            _next.setOnClickListener(_buttonhandler);
             _logout.setEnabled(false);
             _message = (TextView) findViewById(R.id.message);
             _message.setMovementMethod(new ScrollingMovementMethod());
@@ -290,18 +302,21 @@ public class RaccClientActivity extends Activity {
                     _logout.setEnabled(false);
                     _back.setEnabled(false);
                     _post.setEnabled(false);
+                    _next.setEnabled(false);
                     break;
     	        case LOGGING_IN:
                     _login.setEnabled(false);
                     _logout.setEnabled(true);
                     _back.setEnabled(false);
                     _post.setEnabled(false);
+                    _next.setEnabled(false);
                     break;
     	        case FORUM_LIST:
                     _login.setEnabled(false);
                     _logout.setEnabled(true);
                     _back.setEnabled(false);
                     _post.setEnabled(false);
+                    _next.setEnabled(false);
                     break;
     	        case MESSAGE_LIST:
     	        case SHOW_POST:
@@ -309,6 +324,7 @@ public class RaccClientActivity extends Activity {
                     _logout.setEnabled(true);
                     _back.setEnabled(true);
                     _post.setEnabled(true);
+                    _next.setEnabled(_main._cannext);
                     break;
     	        }
 ///    	        _list = new ForumListAdapter(this, R.layout.item, (ArrayList<Forum>) _main._forumlist.clone());

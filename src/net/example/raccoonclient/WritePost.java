@@ -34,7 +34,7 @@ public class WritePost extends Activity {
                 _postanonymous.setVisibility(View.INVISIBLE);
             _postanonymous.setOnClickListener(_buttonhandler);
         } catch (Exception e) {
-            Log.e(TAG, "Exception: " + e);
+            Log.e(TAG, "Exception: ", e);
         }   
 
     }   

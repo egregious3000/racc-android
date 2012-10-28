@@ -150,6 +150,10 @@ public class ClientMain extends Service {
                 }
                 if (line.startsWith("Formal-Name")) {
                     author = getUserName(line.substring(13));
+                } else if (line.startsWith("302 Note body")) {
+                    // 302 Note body follows   noteno:41602    size:239
+                    String[] parts = line.split("\t");
+                    _currentmessage = Integer.parseInt(parts[1].substring(7));
                 } else if (line.startsWith("Date")) {
                     // Date: Thu, 06 Nov 2008 21:13:00 GMT
                     date = line.substring(11,27) + line.substring(30);
@@ -207,7 +211,10 @@ public class ClientMain extends Service {
     SpannableStringBuilder _formattedpost = null;
     MessageList _emptylist = new MessageList();
     String[] _emptypost = { };
-
+    int _lastnote = 0; // keeps track of the 
+    boolean _cannext = false; // is the "next" button lit?
+    int _currentmessage = 0; // that message is showing right now
+    
     public boolean post(String s, Integer mode) {
         Log.d(TAG, "posting something");
         Log.v(TAG, "posting " + s);
@@ -243,7 +250,20 @@ public class ClientMain extends Service {
         }
         return true;
     }
-    
+
+    // these two functions should be merged
+    public boolean getNextMessage() {
+        assert (_state == State.MESSAGE_LIST);
+        _state = State.SHOW_POST;
+        String[] lines = writeline("READ > " + (_currentmessage+1) + "\n");
+        _post = lines;
+        _formattedpost = formatMessage(lines);
+        _currentlist = _emptylist;
+        _cannext = (_currentmessage < _lastnote);
+        Log.e(TAG, "current is " + _currentmessage + " and lastnote is " + _lastnote);
+        
+        return true;
+    }
     public boolean getMessage(int i) {
         assert (_state == State.MESSAGE_LIST);
         _state = State.SHOW_POST;
@@ -251,6 +271,8 @@ public class ClientMain extends Service {
         _post = lines;
         _formattedpost = formatMessage(lines);
         _currentlist = _emptylist;
+        _cannext = (i < _lastnote);
+        Log.e(TAG, "i is " + i + " and lastnote is " + _lastnote);
         return true;
     }
     
@@ -270,6 +292,7 @@ public class ClientMain extends Service {
                 _forumname = s.substring(5);
             }
         }
+        _lastnote = Integer.parseInt(lastnote);
         String firstnote = "";
         if (_forummode == R.id.radio_unread) {
             lines2 = writeline("SHOW rcval\n");
