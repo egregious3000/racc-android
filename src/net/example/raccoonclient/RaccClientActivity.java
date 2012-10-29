@@ -319,6 +319,11 @@ public class RaccClientActivity extends Activity {
                     _next.setEnabled(false);
                     break;
     	        case MESSAGE_LIST:
+                    _login.setEnabled(false);
+                    _logout.setEnabled(true);
+                    _back.setEnabled(true);
+                    _post.setEnabled(true);
+                    _next.setEnabled(false); // <-- set this to start reading immediately
     	        case SHOW_POST:
                     _login.setEnabled(false);
                     _logout.setEnabled(true);

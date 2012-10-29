@@ -260,8 +260,8 @@ public class ClientMain extends Service {
         _formattedpost = formatMessage(lines);
         _currentlist = _emptylist;
         _cannext = (_currentmessage < _lastnote);
+        lines = writeline("SET rcval " + _currentmessage + "\n");
         Log.e(TAG, "current is " + _currentmessage + " and lastnote is " + _lastnote);
-        
         return true;
     }
     public boolean getMessage(int i) {
@@ -272,6 +272,7 @@ public class ClientMain extends Service {
         _formattedpost = formatMessage(lines);
         _currentlist = _emptylist;
         _cannext = (i < _lastnote);
+        lines = writeline("SET rcval " + i + "\n");
         Log.e(TAG, "i is " + i + " and lastnote is " + _lastnote);
         return true;
     }
