@@ -122,26 +122,33 @@ public class ClientMain extends Service {
         String author = "";
         String date = "";
         String to = "";
-        
+        int number;
+
         for (String line : lines) {
             if (inheader) {
                 if (line.length() == 0) {
+                    // Headers done now
                     inheader = false;
+                    ssb.append(_forumname + "> msg #");
+                    ssb.append(Integer.toString(_currentmessage));
+                    ssb.append('\n');
+                    ssb.setSpan(new ForegroundColorSpan(0xFFFFFF00), 0, ssb.length(), 0);
+                    int len = ssb.length();
                     if (author.length() == 0) {
                         ssb.append(" -anonymous- ");
-                        ssb.setSpan(new ForegroundColorSpan(0xFFFFFF00), 1, 12, 0);
+                        ssb.setSpan(new ForegroundColorSpan(0xFFFFFF00), len, len + 13, 0);
                         ssb.setSpan(new StyleSpan(Typeface.BOLD), 0, ssb.length(), 0);
                     } else {
                         ssb.append(date);
-                        ssb.setSpan(new ForegroundColorSpan(0xFFFF00FF), 0, date.length(), 0);
+                        ssb.setSpan(new ForegroundColorSpan(0xFFFF00FF), len, ssb.length(), 0);
                         ssb.append(" from ");
                         ssb.append(author);
-                        ssb.setSpan(new ForegroundColorSpan(0xFF00FFFF), date.length() + 6, date.length() + author.length() + 6, 0);
+                        ssb.setSpan(new ForegroundColorSpan(0xFF00FFFF), len + date.length() + 6, len + date.length() + author.length() + 6, 0);
                         if (to.length() != 0) {
                             ssb.append(" to ");
-                            int len = ssb.length();
+                            int len2 = ssb.length();
                             ssb.append(to);
-                            ssb.setSpan(new ForegroundColorSpan(0xFF00FFFF), len, len + to.length(), 0);
+                            ssb.setSpan(new ForegroundColorSpan(0xFF00FFFF), len2, len2 + to.length(), 0);
                         }
                     }
                     ssb.setSpan(new StyleSpan(Typeface.BOLD), 0, ssb.length(), 0);
@@ -159,7 +166,7 @@ public class ClientMain extends Service {
                     date = line.substring(11,27) + line.substring(30);
                 } else if (line.startsWith("Formal-To")) {
                     to = getUserName(line.substring(11));
-                }
+                }   
                 continue;
             }
             if (! line.equals(".")) {
@@ -260,6 +267,7 @@ public class ClientMain extends Service {
         _formattedpost = formatMessage(lines);
         _currentlist = _emptylist;
         _cannext = (_currentmessage < _lastnote);
+        // I do this even in 'read all' mode, which I shouldn't.
         lines = writeline("SET rcval " + _currentmessage + "\n");
         Log.e(TAG, "current is " + _currentmessage + " and lastnote is " + _lastnote);
         return true;
