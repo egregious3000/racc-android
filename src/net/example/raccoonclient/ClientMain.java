@@ -263,6 +263,15 @@ public class ClientMain extends Service {
         assert (_state == State.MESSAGE_LIST);
         _state = State.SHOW_POST;
         String[] lines = writeline("READ > " + (_currentmessage+1) + "\n");
+        String line = lines[0];
+        if (line.startsWith("410")) {
+            writeline("SET rcval " + (_currentmessage+1) + "\n");
+            back(); // to message list
+            back();
+            return grab_forums();
+//            return back(); // to forum list
+        }
+        for (String l : lines)             Log.e(TAG, "XXX: " + l);
         _post = lines;
         _formattedpost = formatMessage(lines);
         _currentlist = _emptylist;

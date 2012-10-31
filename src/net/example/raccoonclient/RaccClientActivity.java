@@ -331,6 +331,7 @@ public class RaccClientActivity extends Activity {
                     _back.setEnabled(true);
                     _post.setEnabled(true);
                     _next.setEnabled(_main._cannext);
+                    _next.setEnabled(true); // experiment with it always being on
                     break;
     	        }
 ///    	        _list = new ForumListAdapter(this, R.layout.item, (ArrayList<Forum>) _main._forumlist.clone());
