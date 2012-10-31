@@ -308,6 +308,8 @@ public class ClientMain extends Service {
             fields = lines2[0].split("\\t");
             firstnote = (fields.length > 1) ?  fields[1] : "";
         }
+        _currentmessage = Integer.parseInt(firstnote) - 1;
+
         String[] lines = writeline("XHDR subject " + firstnote + "-" + lastnote + "\n");
         _messagelist.clear();
         for (String line : lines) {
