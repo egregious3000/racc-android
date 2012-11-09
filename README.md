@@ -7,9 +7,9 @@ LATEST VERSION:
 
 Hopefully take care of exceptions on crashing on logging in.
 
-ISSUES:
+Every time you hit "Next" we set the last-read value.  This is probably too often, but we'll get to that.
 
-The messages you read here are not marked as read on the BBS.
+ISSUES:
 
 Give the .apk a try!
 
@@ -27,6 +27,6 @@ HOW TO USE:
 
 6. Pick a message to read it.
 
-7. Use your device's back button to retrace your steps.
+7. Use your device's back button, or the "Up" button on the UI, to retrace your steps.
 
 
