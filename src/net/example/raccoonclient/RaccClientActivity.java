@@ -13,7 +13,6 @@ import android.os.IBinder;
 import android.os.StrictMode;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
-import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -22,6 +21,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+
 
 public class RaccClientActivity extends Activity {
     
@@ -243,6 +243,7 @@ public class RaccClientActivity extends Activity {
             }
         }
 	}
+
 	
     // Start lifecycle code
 	@Override
@@ -279,6 +280,40 @@ public class RaccClientActivity extends Activity {
             _back.setOnClickListener(_buttonhandler);
             _post.setOnClickListener(_buttonhandler);
             _next.setOnClickListener(_buttonhandler);
+
+            /*
+             // For swiping.
+            View v = findViewById(R.id.message);
+
+            v.setOnTouchListener(new OnSwipeTouchListener() {
+                public void onSwipeTop() {
+                    Toast.makeText(RaccClientActivity.this, "top", Toast.LENGTH_SHORT).show();
+                }
+                public void onSwipeRight() {
+                    Toast.makeText(RaccClientActivity.this, "right", Toast.LENGTH_SHORT).show();
+                }
+                public void onSwipeLeft() {
+                    Toast.makeText(RaccClientActivity.this, "left", Toast.LENGTH_SHORT).show();
+                }
+                public void onSwipeBottom() {
+                    Toast.makeText(RaccClientActivity.this, "bottom", Toast.LENGTH_SHORT).show();
+                }
+            });
+            findViewById(R.id.forumlist).setOnTouchListener(new OnSwipeTouchListener() {
+                public void onSwipeTop() {
+                    Toast.makeText(RaccClientActivity.this, "top", Toast.LENGTH_SHORT).show();
+                }
+                public void onSwipeRight() {
+                    Toast.makeText(RaccClientActivity.this, "right", Toast.LENGTH_SHORT).show();
+                }
+                public void onSwipeLeft() {
+                    Toast.makeText(RaccClientActivity.this, "left", Toast.LENGTH_SHORT).show();
+                }
+                public void onSwipeBottom() {
+                    Toast.makeText(RaccClientActivity.this, "bottom", Toast.LENGTH_SHORT).show();
+                }
+            });
+            */
             _logout.setEnabled(false);
             _message = (TextView) findViewById(R.id.message);
             _message.setMovementMethod(new ScrollingMovementMethod());
