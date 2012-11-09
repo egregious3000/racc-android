@@ -13,7 +13,7 @@
     <string name="text_pass">Password (stored in preferences)</string>
     <string name="hint_pass">Password</string>
   	<string name="done">Done!</string>
-  	<string name="back">Back</string>
+  	<string name="back">Up</string>
  	<string name="next">Next!</string>
 	<string name="post">Post</string>
 	<string name="postanonymous">Post Anonymously</string>
