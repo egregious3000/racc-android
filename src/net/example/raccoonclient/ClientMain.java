@@ -302,21 +302,26 @@ public class ClientMain extends Service {
         if (lines2.length == 0) return false;
         String[] fields = lines2[0].split("\\t");
         String lastnote = "";
+        String firstnote = "";
         for (String s: fields) {
             if (s.startsWith("lastnote")) {
                 lastnote = s.substring(9);
+            }
+            if (s.startsWith("firstnote")) {
+                firstnote = s.substring(10);
             }
             if (s.startsWith("name")) {
                 _forumname = s.substring(5);
             }
         }
         _lastnote = Integer.parseInt(lastnote);
-        String firstnote = "";
         if (_forummode == R.id.radio_unread) {
             lines2 = writeline("SHOW rcval\n");
             fields = lines2[0].split("\\t");
             firstnote = (fields.length > 1) ?  fields[1] : "";
         }
+            
+        Log.w(TAG, "firstnote is " + firstnote);
         _currentmessage = Integer.parseInt(firstnote) - 1;
 
         String[] lines = writeline("XHDR subject " + firstnote + "-" + lastnote + "\n");
@@ -381,6 +386,7 @@ public class ClientMain extends Service {
 	    return grab_forums();
 	}
 	
+
 	public boolean grab_forums() {
 	    if (_state != State.FORUM_LIST) 
 	        return false;
