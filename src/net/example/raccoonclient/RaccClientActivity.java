@@ -88,7 +88,7 @@ public class RaccClientActivity extends Activity {
 
     TextView _usernametextfield, _message;
     int _messagesize = 14;
-    Button _userpass, _login, _logout, _back, _post, _next;
+    Button _userpass, _login, _logout, _back, _post, _prev, _next;
 //    ForumListAdapter _list;
 //    ArrayAdapter<ClientMain.Thingy> _list;
     ClientMain.ThingyListAdapter _list;
@@ -113,6 +113,10 @@ public class RaccClientActivity extends Activity {
             if (params[0].equals("logout")) {
                 _main.logout();
                 return false;
+            }
+            if (params[0].equals("forumlist")) {
+                _main.grab_forums();
+                return false; // does this matter?
             }
             return false;
         }
@@ -210,8 +214,8 @@ public class RaccClientActivity extends Activity {
 
 	public void onRadioButtonClicked(View v) {
 	    _main._forummode = v.getId();
-	    _main.grab_forums();
-	    onResume();
+        _dialer = new Dialer();
+        _dialer.execute("forumlist");
 	}
 
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -273,12 +277,14 @@ public class RaccClientActivity extends Activity {
             _logout = (Button) findViewById(R.id.logout);
             _back = (Button) findViewById(R.id.back);
             _post = (Button) findViewById(R.id.post);
+            _prev = (Button) findViewById(R.id.prev);
             _next = (Button) findViewById(R.id.next);
             _userpass.setOnClickListener(_buttonhandler);
             _login.setOnClickListener(_buttonhandler);
             _logout.setOnClickListener(_buttonhandler);
             _back.setOnClickListener(_buttonhandler);
             _post.setOnClickListener(_buttonhandler);
+            _prev.setOnClickListener(_buttonhandler);
             _next.setOnClickListener(_buttonhandler);
 
             /*
@@ -337,6 +343,7 @@ public class RaccClientActivity extends Activity {
                     _logout.setEnabled(false);
                     _back.setEnabled(false);
                     _post.setEnabled(false);
+                    _prev.setEnabled(false);
                     _next.setEnabled(false);
                     break;
     	        case LOGGING_IN:
@@ -344,6 +351,7 @@ public class RaccClientActivity extends Activity {
                     _logout.setEnabled(true);
                     _back.setEnabled(false);
                     _post.setEnabled(false);
+                    _prev.setEnabled(false);
                     _next.setEnabled(false);
                     break;
     	        case FORUM_LIST:
@@ -351,6 +359,7 @@ public class RaccClientActivity extends Activity {
                     _logout.setEnabled(true);
                     _back.setEnabled(false);
                     _post.setEnabled(false);
+                    _prev.setEnabled(false);
                     _next.setEnabled(false);
                     break;
     	        case MESSAGE_LIST:
@@ -358,6 +367,7 @@ public class RaccClientActivity extends Activity {
                     _logout.setEnabled(true);
                     _back.setEnabled(true);
                     _post.setEnabled(true);
+                    _prev.setEnabled(false);
                     _next.setEnabled(true); // <-- set this to start reading immediately
                     break;
     	        case SHOW_POST:
@@ -365,6 +375,7 @@ public class RaccClientActivity extends Activity {
                     _logout.setEnabled(true);
                     _back.setEnabled(true);
                     _post.setEnabled(true);
+                    _prev.setEnabled(false);
                     _next.setEnabled(_main._cannext);
                     _next.setEnabled(true); // experiment with it always being on
                     break;
