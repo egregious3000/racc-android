@@ -66,17 +66,27 @@ public class RaccClientActivity extends Activity {
         String post;
         Integer mode;
         Post(String p, Integer m) { post = p; mode = m; } 
-    }
+    }    
     ArrayBlockingQueue<Post> _posts = new ArrayBlockingQueue<Post>(10);
+    private class Profile {
+            String username;
+            String password;
+            Profile(String u, String p) { username = u; password = p; }
+    }
+    ArrayBlockingQueue<Profile> _profiles = new ArrayBlockingQueue<Profile>(10);
     
     private class MainUILoop implements Runnable {
         @Override
         public void run() {
             if (_killed)
                 return;
-            Post post;
-            // make a post if it's in our queue; I hope it's the right forum!
             if (_main != null) {
+                Profile prof;
+                if ((prof = _profiles.poll()) != null) {
+                    _main.setNewProfile(prof.username, prof.password);
+                }
+                // make a post if it's in our queue; I hope it's the right forum!
+                Post post;
                 if ((post = _posts.poll()) != null) {
                     _main.post(post.post, post.mode);
                 }
@@ -216,7 +226,7 @@ public class RaccClientActivity extends Activity {
 	    _main._forummode = v.getId();
         _dialer = new Dialer();
         _dialer.execute("forumlist");
-	}
+}
 
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 	    super.onActivityResult(requestCode, resultCode, data);
@@ -228,7 +238,7 @@ public class RaccClientActivity extends Activity {
                 _username = b.getString("username");
                 _password = b.getString("password");
                 _usernametextfield.setText(_username);
-                _main.setNewProfile(_username, _password);
+                _profiles.add(new Profile(_username, _password));
             }
         }
         if (requestCode == 129) {
