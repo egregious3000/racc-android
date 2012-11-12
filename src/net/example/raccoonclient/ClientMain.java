@@ -304,6 +304,7 @@ public class ClientMain extends Service {
         String lastnote = "";
         String firstnote = "";
         for (String s: fields) {
+//            Log.e(TAG, "field is " + s);
             if (s.startsWith("lastnote")) {
                 lastnote = s.substring(9);
             }
@@ -543,7 +544,10 @@ public class ClientMain extends Service {
         } catch (Exception e) {
             Log.e(TAG, "Other error", e);
         }
-	    return readlines(mode);
+	    String[] ret = readlines(mode);
+//	    for (String r : ret) 
+	//        Log.e(TAG, "line is: " + r);
+	    return ret;
 	}
 
 	
