@@ -258,6 +258,25 @@ public class ClientMain extends Service {
         return true;
     }
 
+    // should this be merged with getPrevMessage() ?
+    public boolean getPrevMessage() {
+        assert (_state == State.MESSAGE_LIST);
+        _state = State.SHOW_POST;
+        String[] lines = writeline("READ < " + (_currentmessage-1) + "\n");
+        String line = lines[0];
+        if (line.startsWith("410")) {
+            back(); // to message list... stop here???
+            return false;
+        }
+        for (String l : lines)             Log.e(TAG, "XXX: " + l);
+        _post = lines;
+        _formattedpost = formatMessage(lines);
+        _currentlist = _emptylist;
+        _cannext = (_currentmessage < _lastnote);
+        Log.e(TAG, "current is " + _currentmessage + " and lastnote is " + _lastnote);
+        return true;
+    }
+
     // these two functions should be merged
     public boolean getNextMessage() {
         assert (_state == State.MESSAGE_LIST);
@@ -426,6 +445,10 @@ public class ClientMain extends Service {
 	        _s.close();
         } catch (IOException e) {
             Log.e(TAG, "IO Exception on close", e);
+        } catch (NullPointerException e) {
+            Log.e(TAG, "null pointer on _s, damn race cponditions");
+        } catch (Exception e) {
+            Log.e(TAG, "other error, possible NPE", e);
         }
 	    _s = null;
 	}

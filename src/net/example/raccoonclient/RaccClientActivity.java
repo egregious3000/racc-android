@@ -160,6 +160,10 @@ public class RaccClientActivity extends Activity {
                 _main.changeToForum(numbers[0]);
                 return null;
             }
+            if (_mode.equals("prev")) {
+                _main.getPrevMessage();
+                return null;
+            }
             if (_mode.equals("next")) {
                 _main.getNextMessage();
                 return null;
@@ -212,6 +216,9 @@ public class RaccClientActivity extends Activity {
             case R.id.back:
                 _main.back();
                 onResume();
+                break;
+            case R.id.prev:
+                new Reader("prev").execute();
                 break;
             case R.id.next:
                 new Reader("next").execute();
@@ -385,9 +392,9 @@ public class RaccClientActivity extends Activity {
                     _logout.setEnabled(true);
                     _back.setEnabled(true);
                     _post.setEnabled(true);
-                    _prev.setEnabled(false);
+                    _prev.setEnabled(true);
                     _next.setEnabled(_main._cannext);
-                    _next.setEnabled(true); // experiment with it always being on
+                    _next.setEnabled(true); // let's experiment with it always being on
                     break;
     	        }
 ///    	        _list = new ForumListAdapter(this, R.layout.item, (ArrayList<Forum>) _main._forumlist.clone());
