@@ -21,11 +21,10 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
-import android.text.SpannedString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.text.util.Linkify;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -174,6 +173,9 @@ public class ClientMain extends Service {
                 ssb.append("\n");
             }   
         }   
+        // I should webify only the body, not the body with its headers
+        Linkify.addLinks(ssb, Linkify.WEB_URLS);
+
         return ssb;
     }
 
@@ -323,7 +325,7 @@ public class ClientMain extends Service {
         String lastnote = "";
         String firstnote = "";
         for (String s: fields) {
-//            Log.e(TAG, "field is " + s);
+            Log.e(TAG, "field is " + s);
             if (s.startsWith("lastnote")) {
                 lastnote = s.substring(9);
             }
