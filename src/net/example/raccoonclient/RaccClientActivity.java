@@ -11,7 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.StrictMode;
-import android.text.method.ScrollingMovementMethod;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -339,8 +339,7 @@ public class RaccClientActivity extends Activity {
             */
             _logout.setEnabled(false);
             _message = (TextView) findViewById(R.id.message);
-            _message.setMovementMethod(new ScrollingMovementMethod());
-            //            _list = new ForumListAdapter(this, R.layout.item, new ArrayList<Forum>());
+            _message.setMovementMethod(LinkMovementMethod.getInstance());
             _h.post(_looper);
         } catch (Exception e) {
             Log.e(TAG, "Creation Exception", e);
@@ -362,6 +361,7 @@ public class RaccClientActivity extends Activity {
                     _post.setEnabled(false);
                     _prev.setEnabled(false);
                     _next.setEnabled(false);
+                    _next.setBackgroundResource(android.R.drawable.btn_default);
                     break;
     	        case LOGGING_IN:
                     _login.setEnabled(false);
@@ -370,6 +370,7 @@ public class RaccClientActivity extends Activity {
                     _post.setEnabled(false);
                     _prev.setEnabled(false);
                     _next.setEnabled(false);
+                    _next.setBackgroundResource(android.R.drawable.btn_default);
                     break;
     	        case FORUM_LIST:
                     _login.setEnabled(false);
@@ -378,6 +379,7 @@ public class RaccClientActivity extends Activity {
                     _post.setEnabled(false);
                     _prev.setEnabled(false);
                     _next.setEnabled(false);
+                    _next.setBackgroundResource(android.R.drawable.btn_default);
                     break;
     	        case MESSAGE_LIST:
     	            _login.setEnabled(false);
@@ -386,6 +388,7 @@ public class RaccClientActivity extends Activity {
                     _post.setEnabled(true);
                     _prev.setEnabled(false);
                     _next.setEnabled(true); // <-- set this to start reading immediately
+                    _next.setBackgroundResource(android.R.drawable.btn_default);
                     break;
     	        case SHOW_POST:
                     _login.setEnabled(false);
@@ -393,8 +396,11 @@ public class RaccClientActivity extends Activity {
                     _back.setEnabled(true);
                     _post.setEnabled(true);
                     _prev.setEnabled(true);
-                    _next.setEnabled(_main._cannext);
                     _next.setEnabled(true); // let's experiment with it always being on
+                    if (_main._cannext)
+                        _next.setBackgroundResource(android.R.drawable.btn_default);
+                    else
+                        _next.setBackgroundColor(0xFF008080);
                     break;
     	        }
 ///    	        _list = new ForumListAdapter(this, R.layout.item, (ArrayList<Forum>) _main._forumlist.clone());
