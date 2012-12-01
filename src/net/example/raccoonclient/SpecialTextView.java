@@ -25,9 +25,10 @@ public class SpecialTextView extends LinearLayout {
         super(context, attrs);
     }
 
-    public SpecialTextView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-    }
+    // disabled for 2.2.2
+  //  public SpecialTextView(Context context, AttributeSet attrs, int defStyle) {
+//        super(context, attrs, defStyle);
+   // }
 
     protected void onDraw (Canvas canvas) {
         super.onDraw(canvas);

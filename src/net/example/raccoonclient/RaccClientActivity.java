@@ -10,7 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.StrictMode;
+//import android.os.StrictMode;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -282,7 +282,7 @@ public class RaccClientActivity extends Activity {
 	@Override
     public void onCreate(Bundle savedInstanceState) {
 	    // this lets us do network IO from the UI thread.  This is not a good overall design.
-        StrictMode.enableDefaults();
+     //   StrictMode.enableDefaults();
 	    super.onCreate(savedInstanceState);
         try {
             doBindService();
