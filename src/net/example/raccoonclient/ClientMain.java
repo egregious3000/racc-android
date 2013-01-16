@@ -1,6 +1,6 @@
 package net.example.raccoonclient;
 
-// Copyright 2012.  You may modify for your personal use.  You may not submit to any appstore.
+// Copyright 2012, 2013.  You may modify for your personal use.  You may not submit to any appstore.
 
 
 import java.io.IOException;
@@ -246,6 +246,7 @@ public class ClientMain extends Service {
     public boolean back() {
         Log.d(TAG, "state is " + _state + " and messagelist size is " + _messagelist.size());
         if (_state == State.SHOW_POST) {
+            _status = "Message list loaded";
             _state = State.MESSAGE_LIST;
             _post = _emptypost;
             _formattedpost = null;
@@ -253,6 +254,7 @@ public class ClientMain extends Service {
             return true;
         }
         if (_state == State.MESSAGE_LIST) {
+            _status = "Forums loaded";
             _state = State.FORUM_LIST;
             _currentlist = _forumlist;
             return true;
@@ -263,6 +265,7 @@ public class ClientMain extends Service {
     // should this be merged with getPrevMessage() ?
     public boolean getPrevMessage() {
         assert (_state == State.MESSAGE_LIST);
+        _status = "Showing post";
         _state = State.SHOW_POST;
         String[] lines = writeline("READ < " + (_currentmessage-1) + "\n");
         String line = lines[0];
@@ -386,15 +389,20 @@ public class ClientMain extends Service {
 	
 	// Returns success if we log in
 	public boolean login() {
-        _state = State.LOGGING_IN;
+	    _status = "Logging in...";
+	    _state = State.LOGGING_IN;
 	    Log.w(TAG, "logging in");
 	    try {
             _s = new Socket("bbs.iscabbs.com", 6145);
         } catch (UnknownHostException e) {
-            Log.e(TAG, "unknown host", e);
+            Log.e(TAG, "unknown host");
+            _status = "Unknown host: are you connected?";
+            _state = State.INITIAL;
             return false;
         } catch (IOException e) {
             Log.e(TAG, "io exception", e);
+            _status = "IO Exception";
+            _state = State.INITIAL;
             return false;
         }
 	    String[] r = readlines();
@@ -404,7 +412,8 @@ public class ClientMain extends Service {
 	    for (String s : r) {
 	        Log.e(TAG, "line is " + s);
 	    }
-        _state = State.FORUM_LIST;
+	    _status = "Connected";
+	    _state = State.FORUM_LIST;
 	    return grab_forums();
 	}
 	
@@ -433,13 +442,15 @@ public class ClientMain extends Service {
             Forum f = new Forum(line);
             _forumlist.add(f);
         }
+        _status = "Forums loaded";
         _state = State.FORUM_LIST;
         return true;
 	}
 	
 	public void logout() {
 	    Log.w(TAG, "logging out");
-        _state = State.INITIAL;
+	    _status = "Logged out";
+	    _state = State.INITIAL;
 	    if (_s == null)
 	        return;
 	    try {
@@ -563,6 +574,7 @@ public class ClientMain extends Service {
             Log.e(TAG, "IO Exception", e);
             _s = null;
             // I need convenience functions for switching to a given state
+            _status = "Unexpectedly disconnected";
             _state = State.INITIAL;
             _currentlist = _forumlist;
             return _emptypost;

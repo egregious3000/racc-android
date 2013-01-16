@@ -96,7 +96,7 @@ public class RaccClientActivity extends Activity {
     }
     // End UI Loop Code
 
-    TextView _usernametextfield, _message;
+    TextView _usernametextfield, _message, _status;
     int _messagesize = 14;
     Button _userpass, _login, _logout, _back, _post, _prev, _next;
 //    ForumListAdapter _list;
@@ -109,6 +109,7 @@ public class RaccClientActivity extends Activity {
         @Override
         protected void onPostExecute(Boolean status)
         {
+            Log.e(TAG, "STATUS IS " + status);
             super.onPostExecute(status);
             _login.setEnabled(!status);
             _logout.setEnabled(status);
@@ -288,6 +289,7 @@ public class RaccClientActivity extends Activity {
             doBindService();
             Log.e(TAG, "starting");
             setContentView(R.layout.main);
+            _status = (TextView) findViewById(R.id.status);
             _usernametextfield = (TextView) findViewById(R.id.username);
             _userpass = (Button) findViewById(R.id.change);
             _login  = (Button) findViewById(R.id.login);
@@ -352,7 +354,8 @@ public class RaccClientActivity extends Activity {
 	    _message.setTextSize(_messagesize);
 	    Log.w(TAG, "Resuming");
 	    try { 
-    	    if (_main != null) {
+	        if (_main != null) {
+	            _status.setText(_main._status); // _main._state);
     	        switch (_main._state) {
     	        case INITIAL:
                     _login.setEnabled(true);
@@ -365,7 +368,7 @@ public class RaccClientActivity extends Activity {
                     break;
     	        case LOGGING_IN:
                     _login.setEnabled(false);
-                    _logout.setEnabled(true);
+                    _logout.setEnabled(false);
                     _back.setEnabled(false);
                     _post.setEnabled(false);
                     _prev.setEnabled(false);
