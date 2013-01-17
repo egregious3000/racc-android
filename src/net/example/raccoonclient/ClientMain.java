@@ -229,17 +229,34 @@ public class ClientMain extends Service {
         Log.v(TAG, "posting " + s);
         String[] lines = writeline("OKAY POST\n", 1);
         if (lines.length == 0 || lines[0].charAt(0) == '4') {
-            Log.e(TAG, "error with posting: " + lines[0]);
+            Log.e(TAG, "Cannot post: " + lines[0]);
+            _status = lines[0];
             return false;
         }
         if (lines[0].charAt(0) != '2') {
             Log.e(TAG, "PROTOCOL ERROR.  We are mis-aligned. " +  lines[0]);
+            _status = "Protocol error: " + lines[0];
         }
         String flags = (mode == R.id.postanonymous) ? " flags:anonymous" : "";
         writeline("POST" + flags + "\n", 1);
         String[] test = writeline(s + "\n.\n");
-        for (String t : test) 
-            Log.e(TAG, "post returned " + t);
+        if (test.length != 1) {
+            _status = "Unexpected response length: " + test.length;
+            return false;
+        }
+        String t = test[0];
+        if (t.length() == 0) {
+            _status = "Empty response!";
+            return false;
+        }
+        if (t.charAt(0) == '4') {
+            _status = t;
+            return false;
+        }
+        if (t.charAt(0) != '2') {
+            _status = "Weird status: " + t;
+            return false;
+        }
         return true;
     }
 
@@ -285,6 +302,7 @@ public class ClientMain extends Service {
     // these two functions should be merged
     public boolean getNextMessage() {
         assert (_state == State.MESSAGE_LIST);
+        _status = "Showing next post";
         _state = State.SHOW_POST;
         String[] lines = writeline("READ > " + (_currentmessage+1) + "\n");
         String line = lines[0];
@@ -307,6 +325,7 @@ public class ClientMain extends Service {
     }
     public boolean getMessage(int i) {
         assert (_state == State.MESSAGE_LIST);
+        _status = "Getting message";
         _state = State.SHOW_POST;
         String[] lines = writeline("READ " + i + "\n");
         _post = lines;
@@ -320,6 +339,7 @@ public class ClientMain extends Service {
     
     public boolean changeToForum(int i) {
         assert (_state == State.FORUM_LIST);
+        _status = "Showing forum " + i;
         _state = State.MESSAGE_LIST;
         Log.d(TAG, "switching to forum " + i);
         String[] lines2 = writeline("TOPIC " + i + "\n");
@@ -409,12 +429,26 @@ public class ClientMain extends Service {
 	    Log.e(TAG, "login got " + r[0]);
 	
 	    r = writeline("LOGIN\t" + _username + "\t" + _password + "\n");
-	    for (String s : r) {
-	        Log.e(TAG, "line is " + s);
+	    if (r.length != 1) {
+	        _status = "Goofy state, what happened?";
+            _state = State.INITIAL;
+	        return false;
 	    }
-	    _status = "Connected";
-	    _state = State.FORUM_LIST;
-	    return grab_forums();
+	    String line = r[0];
+	    if (line.length() == 0) {
+	        _status = "Empty response!";
+            _state = State.INITIAL;
+	        return false;
+	    }
+	    if (line.charAt(0) == '2') {
+	        _status = "Connected";
+	        _state = State.FORUM_LIST;
+	        return grab_forums();
+	    }
+	    // some kind of error
+	    _status = line;
+	    _state = State.INITIAL;
+	    return false;
 	}
 	
 
@@ -571,7 +605,7 @@ public class ClientMain extends Service {
         } catch (UnsupportedEncodingException e) {
             Log.e(TAG, "UTF-8 doesn't work, this is weird", e);
         } catch (IOException e) {
-            Log.e(TAG, "IO Exception", e);
+            Log.e(TAG, "IO Exception", e);  
             _s = null;
             // I need convenience functions for switching to a given state
             _status = "Unexpectedly disconnected";

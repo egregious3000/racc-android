@@ -88,7 +88,13 @@ public class RaccClientActivity extends Activity {
                 // make a post if it's in our queue; I hope it's the right forum!
                 Post post;
                 if ((post = _posts.poll()) != null) {
-                    _main.post(post.post, post.mode);
+                    if (_main.post(post.post, post.mode)) {
+                        _status.setText("Message posted");
+                    } else {
+                        _status.setText(_main._status);
+                        // save post.post somewhere
+                    }
+                        
                 }
             }
             _h.postDelayed(this, 1000);
@@ -112,7 +118,7 @@ public class RaccClientActivity extends Activity {
             Log.e(TAG, "STATUS IS " + status);
             super.onPostExecute(status);
             _login.setEnabled(!status);
-            _logout.setEnabled(status);
+            _logout.setEnabled(status); 
             onResume();
         }
 
@@ -198,6 +204,8 @@ public class RaccClientActivity extends Activity {
                 if (_main == null) {
                     Log.e(TAG, "main is null :<");
                 } else {
+                    _status.setText("Logging in...");
+                    _login.setEnabled(false);
                     _dialer = new Dialer();
                     _dialer.execute("login");
                 }   
@@ -207,6 +215,7 @@ public class RaccClientActivity extends Activity {
                     Log.e(TAG, "main is null :<");
                 } else {
                     try {
+                        _status.setText("Logging out...");
                         _dialer = new Dialer();
                         _dialer.execute("logout");
                     } catch (Exception e) {
