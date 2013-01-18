@@ -92,7 +92,7 @@ public class RaccClientActivity extends Activity {
                         _status.setText("Message posted");
                     } else {
                         _status.setText(_main._status);
-                        // save post.post somewhere
+                        _main._oldpost = post.post;
                     }
                         
                 }
@@ -198,6 +198,7 @@ public class RaccClientActivity extends Activity {
                 assert(_main != null);
                 Intent i2 = new Intent(RaccClientActivity.this, WritePost.class);
                 i2.putExtra("forumname", _main._forumname);
+                i2.putExtra("oldpost", _main._oldpost);
                 startActivityForResult(i2, 129);
                 break;
             case R.id.login:
@@ -266,6 +267,7 @@ public class RaccClientActivity extends Activity {
                     String thepost = b.getString("thepost");
                     Integer id = b.getInt("anon");
                     Post post = new Post(thepost, id);
+                    _main._oldpost = "";
                     _posts.add(post);
                     Log.e(TAG, "sample");
                 } catch (Exception e) {

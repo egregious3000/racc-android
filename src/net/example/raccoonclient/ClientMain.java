@@ -390,6 +390,8 @@ public class ClientMain extends Service {
 	public String _status = "Not connected"; // readable by humans
 	public int _forumnumber = 0;
 	public String _forumname = "Lobby";
+
+	public String _oldpost = "";  // save the last post if it failed
 	
 	public String _username = "default1";
 	public String _password = "default2";

@@ -27,6 +27,7 @@ public class WritePost extends Activity {
             Intent i = this.getIntent();
             Bundle b = i.getExtras();
             _header.setText("Posting to " + b.getString("forumname"));
+            _thepost.setText(b.getString("oldpost"));
             _post = (Button) findViewById(R.id.post);
             _postanonymous = (Button) findViewById(R.id.postanonymous);
             _post.setOnClickListener(_buttonhandler);
